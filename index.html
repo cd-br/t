@@ -494,7 +494,9 @@
         }
 
         .drag-handle {
+            border: 0;
             cursor: grab;
+            font-family: inherit;
             font-size: 18px;
             color: var(--text-muted);
             padding: 8px;
@@ -502,6 +504,21 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
             user-select: none;
+            touch-action: none;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .drag-handle:focus-visible {
+            outline: 2px solid var(--accent-cyan);
+            outline-offset: 2px;
+        }
+
+        .dynamic-item.is-dragging {
+            opacity: 0.55;
+            border-style: dashed;
         }
 
         .chips-selector {
@@ -822,6 +839,7 @@
         ];
 
         let postosApoioAtivos = ["p1", "p2", "p3"];
+        let arrasteListaAtivo = null;
 
         const titulosEtapas = {
             1: "Etapa 1 — Período e Paridade",
@@ -837,6 +855,11 @@
             renderizarSeletorPostosApoio();
             atualizarResumosHome();
         };
+
+        document.addEventListener("pointerdown", iniciarArrasteLista);
+        document.addEventListener("pointermove", moverItemArrastado);
+        document.addEventListener("pointerup", finalizarArrasteLista);
+        document.addEventListener("pointercancel", finalizarArrasteLista);
 
         function fecharModal() {
             document.getElementById("modalAtualizacao").style.display = "none";
@@ -1010,9 +1033,10 @@
                 if (!p.id) p.id = "p_" + Date.now() + "_" + index;
                 const item = document.createElement("div");
                 item.className = "dynamic-item posto-item";
+                item.dataset.sortIndex = index;
 
                 item.innerHTML = `
-                    <div class="drag-handle">⇳</div>
+                    <button type="button" class="drag-handle" aria-label="Mover posto ${escaparHtml(p.nome)}; use as setas para reordenar" title="Arraste para reordenar ou use as setas do teclado" onkeydown="moverItemComTeclado(event, 'posto', ${index})">⇳</button>
                     <div class="input-group">
                         <label>Nome do Posto</label>
                         <input type="text" value="${escaparHtml(p.nome)}" onchange="atualizarPosto(${index}, 'nome', this.value)">
@@ -1076,6 +1100,7 @@
             colaboradores.forEach((colab, index) => {
                 const item = document.createElement("div");
                 item.className = "dynamic-item colab-item";
+                item.dataset.sortIndex = index;
 
                 let opcoesPosto = postos.map(p => `<option value="${escaparHtml(p.nome)}" ${colab.postoFixo === p.nome ? 'selected' : ''}>${escaparHtml(p.nome)}</option>`).join("");
                 let outrosColabs = colaboradores
@@ -1084,7 +1109,7 @@
                     .join("");
 
                 item.innerHTML = `
-                    <div class="drag-handle">⇳</div>
+                    <button type="button" class="drag-handle" aria-label="Mover colaborador ${escaparHtml(colab.nome || 'Sem nome')}; use as setas para reordenar" title="Arraste para reordenar ou use as setas do teclado" onkeydown="moverItemComTeclado(event, 'colaborador', ${index})">⇳</button>
                     <div class="input-group">
                         <label>Nome</label>
                         <input type="text" value="${escaparHtml(colab.nome)}" onchange="atualizarColab(${index}, 'nome', this.value)">
@@ -1110,6 +1135,85 @@
                 container.appendChild(item);
             });
             salvarEstado();
+        }
+
+        function iniciarArrasteLista(event) {
+            const puxador = event.target.closest(".drag-handle");
+            if (!puxador || !event.isPrimary || event.button !== 0) return;
+
+            const item = puxador.closest(".dynamic-item");
+            const container = item && item.parentElement;
+            if (!item || !container || item.parentElement !== container) return;
+
+            event.preventDefault();
+            arrasteListaAtivo = {
+                container: container,
+                item: item,
+                puxador: puxador,
+                pointerId: event.pointerId,
+                tipo: container.id === "listaPostos" ? "posto" : "colaborador"
+            };
+            item.classList.add("is-dragging");
+            puxador.setPointerCapture(event.pointerId);
+        }
+
+        function moverItemArrastado(event) {
+            if (!arrasteListaAtivo || event.pointerId !== arrasteListaAtivo.pointerId) return;
+
+            event.preventDefault();
+            const { container, item } = arrasteListaAtivo;
+            const outrosItens = Array.from(container.children).filter(elemento => elemento !== item);
+            const itemAlvo = outrosItens.find(elemento => {
+                const limites = elemento.getBoundingClientRect();
+                return event.clientY < limites.top + limites.height / 2;
+            });
+
+            if (itemAlvo) {
+                container.insertBefore(item, itemAlvo);
+            } else if (outrosItens.length) {
+                container.appendChild(item);
+            }
+        }
+
+        function finalizarArrasteLista(event) {
+            if (!arrasteListaAtivo || event.pointerId !== arrasteListaAtivo.pointerId) return;
+
+            const { container, item, puxador, tipo } = arrasteListaAtivo;
+            item.classList.remove("is-dragging");
+            if (puxador.hasPointerCapture(event.pointerId)) {
+                puxador.releasePointerCapture(event.pointerId);
+            }
+            arrasteListaAtivo = null;
+
+            const indicesOriginais = Array.from(container.children)
+                .map(elemento => Number(elemento.dataset.sortIndex));
+            if (tipo === "posto") {
+                postos = indicesOriginais.map(index => postos[index]);
+                renderizarPostos();
+            } else {
+                colaboradores = indicesOriginais.map(index => colaboradores[index]);
+                renderizarColaboradores();
+            }
+        }
+
+        function moverItemComTeclado(event, tipo, index) {
+            const direcao = event.key === "ArrowUp" ? -1 : event.key === "ArrowDown" ? 1 : 0;
+            if (!direcao) return;
+
+            event.preventDefault();
+            const lista = tipo === "posto" ? postos : colaboradores;
+            const novoIndex = index + direcao;
+            if (novoIndex < 0 || novoIndex >= lista.length) return;
+
+            [lista[index], lista[novoIndex]] = [lista[novoIndex], lista[index]];
+            if (tipo === "posto") {
+                renderizarPostos();
+            } else {
+                renderizarColaboradores();
+            }
+
+            const containerId = tipo === "posto" ? "listaPostos" : "listaColaboradores";
+            document.querySelector(`#${containerId} [data-sort-index="${novoIndex}"] .drag-handle`).focus();
         }
 
         function adicionarColaborador() {
