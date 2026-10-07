@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Escala 12x36 - v2.1</title>
+    <title>Gerador de Escala 12x36</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
@@ -250,18 +250,18 @@
         .drag-handle {
             cursor: grab;
             font-size: 20px;
-            color: #6b7280;
-            padding: 8px;
+            color: #000000;
+            padding: 1px;
             user-select: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 6px;
-            background-color: #e5e7eb;
+            border-radius: 8px;
+            background-color: #c4c4c7;
         }
         .drag-handle:active {
             cursor: grabbing;
-            background-color: #d1d5db;
+            background-color: #82cb64;
         }
 
         .posto-item { grid-template-columns: auto 2fr auto auto; }
@@ -436,14 +436,15 @@
 
         .modal-header h2 {
             margin: 0;
-            font-size: 1.3em;
+            font-size: 1.9em;
             color: #1e293b;
+          padding-left: 1em;
         }
 
         .modal-badge {
-            background: #3b82f6;
+            background: #de9915;
             color: white;
-            font-size: 0.75em;
+            font-size: 0.8em;
             padding: 4px 8px;
             border-radius: 6px;
             font-weight: bold;
@@ -480,19 +481,20 @@
     <div id="modalAtualizacao" class="modal-overlay">
         <div class="modal-card">
             <div class="modal-header">
-                <h2>Atualização do Sistema</h2>
-                <span class="modal-badge">v2.1</span>
+                <h2> Bem vindo de volta!</h2>
             </div>
             <div class="modal-body">
-                <p>Confira as novidades e melhorias aplicadas nesta versão:</p>
+                <p>Confira as novidades e melhorias aplicadas nesta versão: <span class="modal-badge">2.8</span></p>
                 <ul>
-                    <li><strong>Drag and Drop Puro:</strong> Reordenação 100% via cliques e arraste (sem botões de setas).</li>
+                    <li><strong>Organização:</strong> Reordenação 100% via cliques e arraste na seção 2 e 3.</li>
                     <li><strong>Visualização Vertical Livre:</strong> A tabela agora abre totalmente na vertical para você visualizar todos os dias do mês sem limites de scroll interno.</li>
-                    <li><strong>Rolagem Horizontal Adaptativa:</strong> Mantida no Mobile para garantir leitura perfeita.</li>
-                    <li><strong>Visualizar em Nova Aba:</strong> Novo recurso para abrir a escala aberta por inteiro como documento para leitura ou impressão.</li>
+                    <li><strong>Rolagem Horizontal Adaptativa:</strong> Leitura perfeita no Mobile.</li>
+                    <li><strong>Visualização completa da Escala:</strong> Novo recurso para abrir a escala por inteiro como documento. Leitura adaptada para o Mobile. Não precisa fazer download do PDF para visualizar.</li>
+                    <li><strong>Sistemas de alterações</strong> A tabela é editável, adicione qualquer informação direto no resultado da escala.</li>
+                    <li><strong>Novo sistema de salvamento de informações</strong> Todas as suas alterações serão armazenadas localmente.</li>
                 </ul>
             </div>
-            <button class="btn btn-pulse" style="width: 100%; padding: 12px; font-size: 15px;" onclick="fecharModal()">Entendido e Continuar</button>
+            <button class="btn btn-pulse" style="width: 100%; padding: 12px; font-size: 15px;" onclick="fecharModal()">Continuar</button>
         </div>
     </div>
 
@@ -501,7 +503,7 @@
     </div>
 
     <div class="container">
-        <h1>Gerador de Escala 12x36 - v2.1</h1>
+        <h1>Gerador de Escala 12x36</h1>
 
         <div class="section-box">
             <div class="section-title">1. Período e Paridade</div>
@@ -550,10 +552,10 @@
         </div>
 
         <div class="section-box">
-            <div class="section-title">4. Configuração da Informação de Apoio</div>
+            <div class="section-title">4. Informação adicional</div>
             <div class="form-grid">
                 <div class="input-group">
-                    <label for="textoApoioGlobal">Descrição do Apoio Necessário / Mensagem:</label>
+                    <label for="textoApoioGlobal">Mensagem:</label>
                     <input type="text" id="textoApoioGlobal" value="Apoio" placeholder="Ex: Apoio Operacional, Reforço de Turno" onchange="salvarEstado()">
                 </div>
                 <div class="input-group" style="margin-top: 8px;">
@@ -582,7 +584,7 @@
         </div>
 
         <div id="btnContainer" class="btn-action-group" style="display:none;">
-            <button id="btnVisualizarAba" class="btn-view" onclick="abrirTabelaEmNovaAba()">Visualizar Tabela Completa (Nova Aba)</button>
+            <button id="btnVisualizarAba" class="btn-view" onclick="abrirTabelaEmNovaAba()">Visualizar Tabela Completa</button>
             <button id="btnBaixar" class="btn-secondary" onclick="baixarEscalaPDF()">Baixar Escala Completa em PDF</button>
         </div>
     </div>
@@ -678,7 +680,7 @@
                 item.dataset.type = "posto";
 
                 item.innerHTML = `
-                    <div class="drag-handle" title="Arraste para mover">☰ Arrastar</div>
+                    <div class="drag-handle" title="Arraste para mover">⇳</div>
                     <div class="input-group">
                         <label>Nome do Posto</label>
                         <input type="text" value="${p.nome}" placeholder="Nome do Posto" onchange="atualizarPosto(${index}, 'nome', this.value)">
@@ -759,7 +761,7 @@
                     .join("");
 
                 item.innerHTML = `
-                    <div class="drag-handle" title="Arraste para mover">☰ Arrastar</div>
+                    <div class="drag-handle" title="Arraste para mover">⇳</div>
                     <div class="input-group">
                         <label>Nome do Colaborador</label>
                         <input type="text" value="${colab.nome}" placeholder="Nome" onchange="atualizarColab(${index}, 'nome', this.value)">
