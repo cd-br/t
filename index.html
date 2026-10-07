@@ -897,6 +897,16 @@
             }
         }
 
+        function escaparHtml(valor) {
+            return String(valor == null ? "" : valor).replace(/[&<>"']/g, caractere => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            })[caractere]);
+        }
+
         // SALVAMENTO LOCAL
         function salvarEstado() {
             const diasApoio = Array.from(document.querySelectorAll('.chk-dia-apoio:checked')).map(cb => parseInt(cb.value));
@@ -911,12 +921,26 @@
                 postos: postos,
                 colaboradores: colaboradores
             };
-            localStorage.setItem("escala_dados_v3_1", JSON.stringify(dados));
+            try {
+                localStorage.setItem("escala_dados_v3_1", JSON.stringify(dados));
+            } catch (e) {
+                console.error("Não foi possível salvar os dados no armazenamento local.", e);
+            }
             atualizarResumosHome();
         }
 
         function carregarEstado() {
-            const salvo = localStorage.getItem("escala_dados_v3_1");
+            let salvo;
+            try {
+                salvo = localStorage.getItem("escala_dados_v3_1");
+            } catch (e) {
+                console.error("Não foi possível acessar o armazenamento local; usando os dados padrão.", e);
+                document.querySelectorAll('.chk-dia-apoio').forEach(cb => {
+                    cb.checked = (cb.value === "0" || cb.value === "6");
+                });
+                return;
+            }
+
             if (salvo) {
                 try {
                     const dados = JSON.parse(salvo);
@@ -930,9 +954,28 @@
                         });
                     }
 
-                    if (Array.isArray(dados.postos)) postos = dados.postos;
-                    if (Array.isArray(dados.colaboradores)) colaboradores = dados.colaboradores;
-                    if (Array.isArray(dados.postosApoioAtivos)) postosApoioAtivos = dados.postosApoioAtivos;
+                    if (Array.isArray(dados.postos)) {
+                        postos = dados.postos
+                            .filter(p => p && typeof p === "object")
+                            .map((p, index) => ({
+                                id: typeof p.id === "string" && p.id ? p.id : `p_${Date.now()}_${index}`,
+                                nome: typeof p.nome === "string" ? p.nome : `Posto ${index + 1}`,
+                                bloqueadoMax1: p.bloqueadoMax1 === true
+                            }));
+                    }
+                    if (Array.isArray(dados.colaboradores)) {
+                        colaboradores = dados.colaboradores
+                            .filter(c => c && typeof c === "object")
+                            .map(c => ({
+                                nome: typeof c.nome === "string" ? c.nome : "",
+                                tipo: ["rotativo", "fixo", "par"].includes(c.tipo) ? c.tipo : "rotativo",
+                                postoFixo: typeof c.postoFixo === "string" ? c.postoFixo : "",
+                                parNome: typeof c.parNome === "string" ? c.parNome : ""
+                            }));
+                    }
+                    if (Array.isArray(dados.postosApoioAtivos)) {
+                        postosApoioAtivos = dados.postosApoioAtivos.filter(id => typeof id === "string");
+                    }
                 } catch (e) {
                     console.error("Erro ao carregar cache local", e);
                 }
@@ -972,7 +1015,7 @@
                     <div class="drag-handle">⇳</div>
                     <div class="input-group">
                         <label>Nome do Posto</label>
-                        <input type="text" value="${p.nome}" onchange="atualizarPosto(${index}, 'nome', this.value)">
+                        <input type="text" value="${escaparHtml(p.nome)}" onchange="atualizarPosto(${index}, 'nome', this.value)">
                     </div>
                     <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.85em; color: var(--text-muted);">
                         <input type="checkbox" ${p.bloqueadoMax1 ? 'checked' : ''} onchange="atualizarPosto(${index}, 'bloqueadoMax1', this.checked)">
@@ -995,7 +1038,13 @@
         }
 
         function atualizarPosto(index, campo, valor) {
+            const nomeAnterior = postos[index].nome;
             postos[index][campo] = valor;
+            if (campo === "nome") {
+                colaboradores.forEach(colaborador => {
+                    if (colaborador.postoFixo === nomeAnterior) colaborador.postoFixo = valor;
+                });
+            }
             renderizarColaboradores();
             renderizarSeletorPostosApoio();
             salvarEstado();
@@ -1015,7 +1064,7 @@
                 const checked = postosApoioAtivos.includes(p.id) ? "checked" : "";
                 const label = document.createElement("label");
                 label.className = "chip-item";
-                label.innerHTML = `<input type="checkbox" class="chk-posto-apoio" value="${p.id}" ${checked} onchange="salvarEstado()"> ${p.nome}`;
+                label.innerHTML = `<input type="checkbox" class="chk-posto-apoio" value="${escaparHtml(p.id)}" ${checked} onchange="salvarEstado()"> ${escaparHtml(p.nome)}`;
                 container.appendChild(label);
             });
         }
@@ -1028,17 +1077,17 @@
                 const item = document.createElement("div");
                 item.className = "dynamic-item colab-item";
 
-                let opcoesPosto = postos.map(p => `<option value="${p.nome}" ${colab.postoFixo === p.nome ? 'selected' : ''}>${p.nome}</option>`).join("");
+                let opcoesPosto = postos.map(p => `<option value="${escaparHtml(p.nome)}" ${colab.postoFixo === p.nome ? 'selected' : ''}>${escaparHtml(p.nome)}</option>`).join("");
                 let outrosColabs = colaboradores
                     .filter((c, i) => i !== index)
-                    .map(c => `<option value="${c.nome}" ${colab.parNome === c.nome ? 'selected' : ''}>${c.nome || 'Sem nome'}</option>`)
+                    .map(c => `<option value="${escaparHtml(c.nome)}" ${colab.parNome === c.nome ? 'selected' : ''}>${escaparHtml(c.nome || 'Sem nome')}</option>`)
                     .join("");
 
                 item.innerHTML = `
                     <div class="drag-handle">⇳</div>
                     <div class="input-group">
                         <label>Nome</label>
-                        <input type="text" value="${colab.nome}" onchange="atualizarColab(${index}, 'nome', this.value)">
+                        <input type="text" value="${escaparHtml(colab.nome)}" onchange="atualizarColab(${index}, 'nome', this.value)">
                     </div>
                     <div class="input-group">
                         <label>Regra</label>
@@ -1098,7 +1147,7 @@
             });
 
             let htmlTabela = '<div class="table-responsive"><table id="tabelaEscala"><thead><tr><th>Data</th><th>Dia</th>';
-            postos.forEach(p => htmlTabela += `<th>${p.nome}</th>`);
+            postos.forEach(p => htmlTabela += `<th>${escaparHtml(p.nome)}</th>`);
             htmlTabela += '</tr></thead><tbody>';
 
             let ciclo = 0;
@@ -1127,12 +1176,11 @@
                         return true;
                     });
 
-                    let postosDisponiveisParaGiro = postos.filter(p => {
-                        if (p.bloqueadoMax1 && atribuicaoDia[p.nome].length >= 1) return false;
-                        return true;
-                    });
-
                     colabsDisponiveis.forEach((c, idx) => {
+                        const postosDisponiveisParaGiro = postos.filter(p => {
+                            return !p.bloqueadoMax1 || atribuicaoDia[p.nome].length < 1;
+                        });
+
                         if (postosDisponiveisParaGiro.length > 0) {
                             let postoDesignado = "";
 
@@ -1161,11 +1209,11 @@
 
                     postos.forEach(p => {
                         let temColaborador = atribuicaoDia[p.nome].length > 0;
-                        let celulaTexto = temColaborador ? atribuicaoDia[p.nome].join(", ") : "<em>Livre</em>";
+                        let celulaTexto = temColaborador ? escaparHtml(atribuicaoDia[p.nome].join(", ")) : "<em>Livre</em>";
                         const postoAtivoParaApoio = postosApoioMarcados.includes(p.id);
 
                         if (eDiaDeApoio && postoAtivoParaApoio) {
-                            celulaTexto += ` <span class="support-badge">[${textoApoioGlobal}]</span>`;
+                            celulaTexto += ` <span class="support-badge">[${escaparHtml(textoApoioGlobal)}]</span>`;
                         }
 
                         htmlTabela += `<td contenteditable="true">${celulaTexto}</td>`;
@@ -1180,9 +1228,9 @@
 
             let htmlStats = '<div class="stats-container"><h2>Resumo de Turnos</h2><div class="stats-grid">';
             colaboradores.forEach(c => {
-                htmlStats += `<div class="stat-card"><strong>${c.nome || 'Sem nome'}</strong><ul style="margin-top:6px; padding-left:16px; font-size:0.88em; color:var(--text-muted);">`;
+                htmlStats += `<div class="stat-card"><strong>${escaparHtml(c.nome || 'Sem nome')}</strong><ul style="margin-top:6px; padding-left:16px; font-size:0.88em; color:var(--text-muted);">`;
                 postos.forEach(p => {
-                    htmlStats += `<li>${p.nome}: ${stats[c.nome] ? stats[c.nome][p.nome] : 0}</li>`;
+                    htmlStats += `<li>${escaparHtml(p.nome)}: ${stats[c.nome] ? stats[c.nome][p.nome] : 0}</li>`;
                 });
                 htmlStats += '</ul></div>';
             });
@@ -1301,7 +1349,7 @@
                         ${tabelaHtml}
                     </div>
                     <div class="footer">© 2026 Desenvolvido por C.D. | Todos os direitos reservados.</div>
-                </body>
+                </bo${"dy"}>
                 </html>
             `;
 
@@ -1311,8 +1359,17 @@
 
         // GERAR PDF COM ESTILO EXECUTIVO PREMIUM
         function baixarEscalaPDF() {
+            if (!window.jspdf || typeof window.jspdf.jsPDF !== "function") {
+                alert("Não foi possível carregar a biblioteca de PDF. Verifique sua conexão com a internet e tente novamente.");
+                return;
+            }
+
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF("l", "pt", "a4");
+            if (typeof doc.autoTable !== "function") {
+                alert("O complemento de tabelas para PDF não foi carregado. Atualize a página e tente novamente.");
+                return;
+            }
             const mesTexto = document.getElementById("mes").options[document.getElementById("mes").selectedIndex].text;
 
             // Fundo de Cabeçalho do PDF
