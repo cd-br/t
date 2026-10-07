@@ -3,25 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Escala 12x36</title>
+    <title>Gerador de Escala 12x36 - v3.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
-            --primary-bg: #f3f4f6;
-            --text-color: #1f2937;
-            --accent-color: #3b82f6;
-            --accent-hover: #2563eb;
+            --primary-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
             --border-radius: 16px;
-            --weekend-bg: #ffefef;
-            --support-bg: #fee2e2;
-            --support-text: #dc2626;
-            --card-bg-base: 255, 255, 255;
-            --card-bg-transparente: rgba(var(--card-bg-base), 0.92);
-            --lightning-color: #006af5;
         }
 
-        .main-background {
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 16px;
+            overflow-x: hidden;
+        }
+
+        /* FUNDO VIVO ANIMADO */
+        .bg-glow {
             position: fixed;
             top: 0;
             left: 0;
@@ -32,89 +52,244 @@
             overflow: hidden;
         }
 
-        .main-background .bg-lightning {
+        .glow-circle {
             position: absolute;
-            top: -10%;
-            right: -50px;
-            width: 350px;
-            height: 600px;
-            opacity: 0.4;
-            background-color: var(--lightning-color);
-            clip-path: polygon(50% 0%, 80% 20%, 60% 40%, 100% 60%, 40% 100%, 20% 80%, 40% 60%, 0% 40%);
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.35;
+            animation: floatGlow 10s infinite alternate ease-in-out;
         }
 
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 16px;
-            background-color: var(--primary-bg);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding-bottom: 80px;
+        .glow-1 { top: -10%; right: -10%; width: 400px; height: 400px; background: var(--accent-blue); }
+        .glow-2 { bottom: -10%; left: -10%; width: 450px; height: 450px; background: var(--accent-purple); }
+
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-30px, 40px) scale(1.1); }
         }
 
         .container {
-            max-width: 950px;
+            max-width: 900px;
             width: 100%;
-            background-color: var(--card-bg-transparente);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 5px 10px -3px rgba(0, 0, 0, 0.04);
-            padding: 24px;
-            border-radius: var(--border-radius);
-            box-sizing: border-box;
-            position: relative;
-            z-index: 1;
-            backdrop-filter: blur(8px);
+            margin: auto;
         }
 
-        h1 {
+        /* NAVEGAÇÃO DE VIEWS (HOME / WIZARD / RESULTADO) */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* HEADER */
+        header {
             text-align: center;
             margin-bottom: 24px;
-            font-size: 1.6em;
+        }
+
+        header h1 {
+            font-size: 2em;
             font-weight: 800;
-            letter-spacing: -0.025em;
-            background-image: linear-gradient(135deg, #0445d1 0%, var(--accent-color) 100%);
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            letter-spacing: -0.025em;
         }
 
-        .section-box {
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
+        header p {
+            color: var(--text-muted);
+            font-size: 0.9em;
+            margin-top: 6px;
         }
 
-        .section-title {
-            font-size: 1.05em;
-            font-weight: 700;
-            margin-top: 0;
-            margin-bottom: 12px;
-            color: #111827;
+        /* HOMEPAGE - GRID DE CARDS VIVOS */
+        .home-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card-home {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(12px);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            align-items: center;
         }
 
-        .contador-badge {
-            font-size: 0.8em;
-            font-weight: 600;
-            background-color: #eff6ff;
-            color: var(--accent-color);
+        .card-home::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: linear-gradient(90deg, transparent, var(--card-accent, var(--accent-blue)), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card-home:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-home:hover::before {
+            opacity: 1;
+        }
+
+        .card-header-icon {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+        }
+
+        .card-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        .card-info {
+            font-size: 0.85em;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .chip-summary {
+            display: inline-block;
+            margin-top: 10px;
             padding: 4px 10px;
             border-radius: 20px;
-            border: 1px solid #bfdbfe;
+            font-size: 0.75em;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--chip-color, var(--accent-cyan));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* STEPPER / BOLINHAS DE PROGRESSO */
+        .stepper-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .stepper-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .stepper-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 0;
+            transform: translateY(-50%);
+        }
+
+        .stepper-line-progress {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+            z-index: 0;
+            transform: translateY(-50%);
+            transition: width 0.3s ease;
+        }
+
+        .step-ball {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-bg);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9em;
+            cursor: pointer;
+            z-index: 1;
+            transition: all 0.3s;
+        }
+
+        .step-ball.active {
+            border-color: var(--accent-cyan);
+            background: var(--accent-blue);
+            color: #fff;
+            box-shadow: 0 0 15px var(--accent-blue);
+            transform: scale(1.1);
+        }
+
+        .step-ball.completed {
+            border-color: var(--accent-emerald);
+            background: var(--accent-emerald);
+            color: #fff;
+        }
+
+        .step-label {
+            margin-top: 12px;
+            font-size: 0.9em;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* PAINEL WIZARD (FORMULÁRIOS) */
+        .wizard-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            margin-bottom: 20px;
         }
 
         .form-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 12px;
-            margin-bottom: 12px;
+            gap: 14px;
         }
 
         @media (min-width: 600px) {
@@ -128,100 +303,66 @@
         }
 
         label {
-            font-weight: 600;
             font-size: 0.85em;
-            color: #4b5563;
+            font-weight: 600;
+            color: var(--text-muted);
         }
 
         input[type="text"], select {
-            padding: 10px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
+            padding: 12px 14px;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--text-main);
             font-size: 14px;
-            width: 100%;
-            box-sizing: border-box;
-            background-color: #f9fafb;
-            transition: all 0.2s ease;
-            font-family: inherit;
-        }
-
-        input:focus, select:focus {
             outline: none;
-            border-color: var(--accent-color);
-            background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            transition: all 0.2s;
         }
 
+        input[type="text"]:focus, select:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+
+        /* BOTÕES */
         .btn {
-            padding: 10px 16px;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
+            padding: 12px 20px;
+            border-radius: 10px;
             font-size: 14px;
             font-weight: 600;
+            border: none;
             cursor: pointer;
-            transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 8px;
+            transition: all 0.2s;
         }
 
-        .btn:hover { background-color: var(--accent-hover); }
-        .btn-danger { background-color: #dc2626; }
-        .btn-danger:hover { background-color: #b91c1c; }
-        .btn-success { background-color: #10b981; }
-        .btn-success:hover { background-color: #059669; }
-
-        .btn-action-group {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-            margin-top: 15px;
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
         }
 
-        @media (min-width: 600px) {
-            .btn-action-group {
-                grid-template-columns: 1fr 1fr;
-            }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
         }
 
-        .btn-secondary { 
-            background-color: #1e293b; 
-            width: 100%; 
-            padding: 14px; 
-            border-radius: 10px; 
-            font-size: 15px; 
-            font-weight: 600; 
-            color: white; 
-            border: none; 
-            cursor: pointer; 
-            transition: background 0.2s;
-        }
-        .btn-secondary:hover { background-color: #0f172a; }
+        .btn-success { background: var(--accent-emerald); color: #fff; }
+        .btn-danger { background: var(--accent-rose); color: #fff; }
+        .btn-secondary { background: rgba(255, 255, 255, 0.1); color: var(--text-main); }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); }
 
-        .btn-view {
-            background-color: #0284c7;
-            width: 100%;
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            color: white;
-            border: none;
-            cursor: pointer; 
-            transition: background 0.2s;
+        .wizard-nav {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 20px;
         }
-        .btn-view:hover { background-color: #0369a1; }
 
-        @keyframes pulse-subtle {
-            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
-            50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-        }
-        .btn-pulse { animation: pulse-subtle 3s infinite ease-in-out; }
-
+        /* LISTAS DINÂMICAS (POSTOS E COLABORADORES) */
         .dynamic-list {
             display: flex;
             flex-direction: column;
@@ -233,59 +374,28 @@
             display: grid;
             gap: 10px;
             align-items: center;
-            background: #f9fafb;
+            background: rgba(15, 23, 42, 0.4);
             padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-            touch-action: manipulation;
-        }
-
-        .dynamic-item.dragging {
-            opacity: 0.4;
-            border: 2px dashed var(--accent-color);
-            background: #eff6ff;
-        }
-
-        .drag-handle {
-            cursor: grab;
-            font-size: 20px;
-            color: #000000;
-            padding: 1px;
-            user-select: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            background-color: #c4c4c7;
-        }
-        .drag-handle:active {
-            cursor: grabbing;
-            background-color: #82cb64;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
         }
 
         .posto-item { grid-template-columns: auto 2fr auto auto; }
         .colab-item { grid-template-columns: auto 1.5fr 1.2fr 1.5fr auto; }
 
-        @media (max-width: 750px) {
-            .posto-item, .colab-item { 
-                grid-template-columns: 1fr; 
-            }
-            .drag-handle {
-                width: 100%;
-                box-sizing: border-box;
-                text-align: center;
-            }
+        @media (max-width: 650px) {
+            .posto-item, .colab-item { grid-template-columns: 1fr; }
         }
 
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.85em;
-            color: #374151;
-            font-weight: 600;
-            cursor: pointer;
+        .drag-handle {
+            cursor: grab;
+            font-size: 18px;
+            color: var(--text-muted);
+            padding: 6px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            user-select: none;
         }
 
         .chips-selector {
@@ -299,299 +409,280 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            background: #e5e7eb;
-            padding: 6px 10px;
-            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 12px;
+            border-radius: 8px;
             font-size: 0.85em;
             cursor: pointer;
-            user-select: none;
-            transition: background 0.2s;
+            border: 1px solid var(--card-border);
         }
 
-        .chip-item:hover { background: #d1d5db; }
-        .chip-item input { cursor: pointer; }
-
-        .editable-cell {
-            outline: none;
-            padding: 4px;
-            border-radius: 4px;
-            transition: background-color 0.2s;
+        /* TABELA DE RESULTADOS */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--card-border);
         }
 
-        .editable-cell:focus { background-color: #fef08a; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 12px 14px;
+            text-align: center;
+            border-bottom: 1px solid var(--card-border);
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: rgba(15, 23, 42, 0.8);
+            color: var(--accent-cyan);
+            font-weight: 700;
+        }
+
+        td { background-color: rgba(30, 41, 59, 0.4); }
+        tr:nth-child(even) td { background-color: rgba(15, 23, 42, 0.2); }
+        tr.has-support td { background-color: rgba(244, 63, 94, 0.15); }
 
         .support-badge {
-            background-color: var(--support-bg);
-            color: var(--support-text);
+            background-color: rgba(244, 63, 94, 0.2);
+            color: var(--accent-rose);
             font-size: 0.75em;
             font-weight: 700;
             padding: 2px 6px;
             border-radius: 4px;
             display: inline-block;
             margin-left: 4px;
-            border: 1px solid rgba(220, 38, 38, 0.2);
-        }
-
-        /* TABELA DA PÁGINA INICIAL - MANTIDA A ESTRUTURA ORIGINAL COM ROLAGEM HORIZONTAL */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            margin-top: 15px;
-            border-radius: var(--border-radius);
-            border: 1px solid #e5e7eb;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            font-size: 14px;
-        }
-
-        th, td {
-            padding: 12px 14px;
-            text-align: center;
-            border-bottom: 1px solid #e5e7eb;
-            background: white;
-            white-space: nowrap;
-        }
-
-        tr:nth-child(even) td { background-color: #f9fafb; }
-        tr.has-support td { background-color: var(--weekend-bg); }
-
-        th {
-            background-color: #f8fafc;
-            color: #475569;
-            font-weight: 700;
-            border-bottom: 2px solid #e2e8f0;
         }
 
         .stats-container {
             margin-top: 24px;
-            background: #f3f4f6;
+            background: var(--card-bg);
             padding: 20px;
             border-radius: var(--border-radius);
-            font-size: 14px;
-            border: 1px solid #e5e7eb;
+            border: 1px solid var(--card-border);
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-        }
-
-        @media (min-width: 600px) {
-            .stats-grid { grid-template-columns: repeat(3, 1fr); }
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
         }
 
         .stat-card {
-            background: white;
-            padding: 14px;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 12px;
             border-radius: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border: 1px solid #e5e7eb;
-        }
-
-        .stat-card h3 { margin: 0 0 8px 0; font-size: 1em; color: var(--accent-color); }
-        .stat-card ul { margin: 0; padding-left: 18px; color: #4b5563; }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-            box-sizing: border-box;
-        }
-
-        .modal-card {
-            background: white;
-            max-width: 500px;
-            width: 100%;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            font-size: 1.9em;
-            color: #1e293b;
-          padding-left: 1em;
-        }
-
-        .modal-badge {
-            background: #de9915;
-            color: white;
-            font-size: 0.8em;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-
-        .modal-body {
-            font-size: 0.95em;
-            color: #4b5563;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
-
-        .modal-body ul {
-            padding-left: 20px;
-            margin-top: 8px;
-            margin-bottom: 8px;
-        }
-
-        .modal-body li {
-            margin-bottom: 6px;
+            border: 1px solid var(--card-border);
         }
 
         footer {
-            margin-top: 24px;
+            margin-top: 40px;
             font-size: 12px;
-            color: #9ca3af;
+            color: var(--text-muted);
             text-align: center;
-            width: 100%;
         }
     </style>
 </head>
 <body>
 
-    <div id="modalAtualizacao" class="modal-overlay">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h2> Bem vindo de volta!</h2>
-            </div>
-            <div class="modal-body">
-                <p>Confira as novidades e melhorias aplicadas nesta versão: <span class="modal-badge">2.8</span></p>
-                <ul>
-                    <li><strong>Organização:</strong> Reordenação 100% via cliques e arraste na seção 2 e 3.</li>
-                    <li><strong>Visualização Vertical Livre:</strong> A tabela agora abre totalmente na vertical para você visualizar todos os dias do mês sem limites de scroll interno.</li>
-                    <li><strong>Rolagem Horizontal Adaptativa:</strong> Leitura perfeita no Mobile.</li>
-                    <li><strong>Visualização completa da Escala:</strong> Novo recurso para abrir a escala por inteiro como documento. Leitura adaptada para o Mobile. Não precisa fazer download do PDF para visualizar.</li>
-                    <li><strong>Sistemas de alterações</strong> A tabela é editável, adicione qualquer informação direto no resultado da escala.</li>
-                    <li><strong>Novo sistema de salvamento de informações</strong> Todas as suas alterações serão armazenadas localmente.</li>
-                </ul>
-            </div>
-            <button class="btn btn-pulse" style="width: 100%; padding: 12px; font-size: 15px;" onclick="fecharModal()">Continuar</button>
-        </div>
-    </div>
-
-    <div class="main-background">
-        <div class="bg-lightning"></div>
+    <div class="bg-glow">
+        <div class="glow-circle glow-1"></div>
+        <div class="glow-circle glow-2"></div>
     </div>
 
     <div class="container">
-        <h1>Gerador de Escala 12x36</h1>
+        <header>
+            <h1>Escala de Trabalho 12x36</h1>
+            <p>Gerenciador Inteligente e Responsivo de Plantões</p>
+        </header>
 
-        <div class="section-box">
-            <div class="section-title">1. Período e Paridade</div>
-            <div class="form-grid form-grid-2">
-                <div class="input-group">
-                    <label for="mes">Mês de Referência:</label>
-                    <select id="mes" onchange="salvarEstado()">
-                        <option value="0">Janeiro</option>
-                        <option value="1">Fevereiro</option>
-                        <option value="2">Março</option>
-                        <option value="3">Abril</option>
-                        <option value="4">Maio</option>
-                        <option value="5">Junho</option>
-                        <option value="6">Julho</option>
-                        <option value="7">Agosto</option>
-                        <option value="8">Setembro</option>
-                        <option value="9">Outubro</option>
-                        <option value="10">Novembro</option>
-                        <option value="11">Dezembro</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label for="inicioDia">Plantão nos Dias:</label>
-                    <select id="inicioDia" onchange="salvarEstado()">
-                        <option value="par">Pares</option>
-                        <option value="impar">Ímpares</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="section-box">
-            <div class="section-title">
-                <span>2. Postos de Trabalho <span id="contadorPostos" class="contador-badge">Total: 3</span></span>
-                <button class="btn btn-success" onclick="adicionarPosto()">+ Adicionar Posto</button>
-            </div>
-            <div id="listaPostos" class="dynamic-list"></div>
-        </div>
-
-        <div class="section-box">
-            <div class="section-title">
-                3. Colaboradores e Regras
-                <button class="btn btn-success" onclick="adicionarColaborador()">+ Adicionar Colaborador</button>
-            </div>
-            <div id="listaColaboradores" class="dynamic-list"></div>
-        </div>
-
-        <div class="section-box">
-            <div class="section-title">4. Informação adicional</div>
-            <div class="form-grid">
-                <div class="input-group">
-                    <label for="textoApoioGlobal">Mensagem:</label>
-                    <input type="text" id="textoApoioGlobal" value="Apoio" placeholder="Ex: Apoio Operacional, Reforço de Turno" onchange="salvarEstado()">
-                </div>
-                <div class="input-group" style="margin-top: 8px;">
-                    <label>Exibir Apoio nos Postos Selecionados:</label>
-                    <div id="selectorPostosApoio" class="chips-selector"></div>
-                </div>
-                <div class="input-group" style="margin-top: 8px;">
-                    <label>Exibir Apoio nos Dias da Semana:</label>
-                    <div class="chips-selector">
-                        <label class="chip-item"><input type="checkbox" class="chk-dia-apoio" value="0" onchange="salvarEstado()"> Dom</label>
-                        <label class="chip-item"><input type="checkbox" class="chk-dia-apoio" value="1" onchange="salvarEstado()"> Seg</label>
-                        <label class="chip-item"><input type="checkbox" class="chk-dia-apoio" value="2" onchange="salvarEstado()"> Ter</label>
-                        <label class="chip-item"><input type="checkbox" class="chk-dia-apoio" value="3" onchange="salvarEstado()"> Qua</label>
-                        <label class="chip-item"><input type="checkbox" class="chk-dia-apoio" value="4" onchange="salvarEstado()"> Qui</label>
-                        <label class="chip-item"><input type="checkbox" class="chk-dia-apoio" value="5" onchange="salvarEstado()"> Sex</label>
-                        <label class="chip-item"><input type="checkbox" class="chk-dia-apoio" value="6" onchange="salvarEstado()"> Sáb</label>
+        <!-- VIEW 1: PAINEL PRINCIPAL (HOME VIVA COM CARDS) -->
+        <div id="viewHome" class="view-section active">
+            <div class="home-grid">
+                
+                <!-- CARD 1 -->
+                <div class="card-home" style="--card-accent: var(--accent-cyan);" onclick="abrirEtapaWizard(1)">
+                    <div>
+                        <div class="card-header-icon">
+                            <div class="card-icon">📅</div>
+                            <span class="chip-summary" style="--chip-color: var(--accent-cyan);" id="summaryCard1">Carregando...</span>
+                        </div>
+                        <div class="card-title">1. Período & Paridade</div>
+                        <div class="card-info">Escolha o mês de referência e defina a paridade dos plantões (dias pares ou ímpares).</div>
                     </div>
                 </div>
+
+                <!-- CARD 2 -->
+                <div class="card-home" style="--card-accent: var(--accent-amber);" onclick="abrirEtapaWizard(2)">
+                    <div>
+                        <div class="card-header-icon">
+                            <div class="card-icon">🏢</div>
+                            <span class="chip-summary" style="--chip-color: var(--accent-amber);" id="summaryCard2">Carregando...</span>
+                        </div>
+                        <div class="card-title">2. Postos de Trabalho</div>
+                        <div class="card-icon-group"></div>
+                        <div class="card-info">Cadastre e reordene os setores ou guaritas sob sua responsabilidade.</div>
+                    </div>
+                </div>
+
+                <!-- CARD 3 -->
+                <div class="card-home" style="--card-accent: var(--accent-emerald);" onclick="abrirEtapaWizard(3)">
+                    <div>
+                        <div class="card-header-icon">
+                            <div class="card-icon">👥</div>
+                            <span class="chip-summary" style="--chip-color: var(--accent-emerald);" id="summaryCard3">Carregando...</span>
+                        </div>
+                        <div class="card-title">3. Colaboradores e Regras</div>
+                        <div class="card-info">Configure a equipe, regras de rodízio aleatório, postos fixos ou duplas.</div>
+                    </div>
+                </div>
+
+                <!-- CARD 4 -->
+                <div class="card-home" style="--card-accent: var(--accent-purple);" onclick="abrirEtapaWizard(4)">
+                    <div>
+                        <div class="card-header-icon">
+                            <div class="card-icon">⚡</div>
+                            <span class="chip-summary" style="--chip-color: var(--accent-purple);" id="summaryCard4">Carregando...</span>
+                        </div>
+                        <div class="card-title">4. Informação de Apoio</div>
+                        <div class="card-info">Ative avisos de reforço operacional para dias específicos da semana.</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <button class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 16px;" onclick="executarGeracaoEscala()">
+                🚀 Gerar Escala de Trabalho
+            </button>
+        </div>
+
+        <!-- VIEW 2: WIZARD DE CONFIGURAÇÃO (PASSO A PASSO COM BOLINHAS) -->
+        <div id="viewWizard" class="view-section">
+            
+            <div class="stepper-container">
+                <div class="stepper-bar">
+                    <div class="stepper-line"></div>
+                    <div class="stepper-line-progress" id="stepperProgress"></div>
+                    <div class="step-ball" id="ball1" onclick="irParaPasso(1)">1</div>
+                    <div class="step-ball" id="ball2" onclick="irParaPasso(2)">2</div>
+                    <div class="step-ball" id="ball3" onclick="irParaPasso(3)">3</div>
+                    <div class="step-ball" id="ball4" onclick="irParaPasso(4)">4</div>
+                </div>
+                <div class="step-label" id="stepTitle">Etapa 1 — Período e Paridade</div>
+            </div>
+
+            <div class="wizard-card">
+                <!-- ETAPA 1 -->
+                <div id="stepContent1" class="step-content">
+                    <div class="form-grid form-grid-2">
+                        <div class="input-group">
+                            <label for="mes">Mês de Referência:</label>
+                            <select id="mes" onchange="salvarEstado()">
+                                <option value="0">Janeiro</option>
+                                <option value="1">Fevereiro</option>
+                                <option value="2">Março</option>
+                                <option value="3">Abril</option>
+                                <option value="4">Maio</option>
+                                <option value="5">Junho</option>
+                                <option value="6">Julho</option>
+                                <option value="7">Agosto</option>
+                                <option value="8">Setembro</option>
+                                <option value="9">Outubro</option>
+                                <option value="10">Novembro</option>
+                                <option value="11">Dezembro</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="inicioDia">Plantão nos Dias:</label>
+                            <select id="inicioDia" onchange="salvarEstado()">
+                                <option value="par">Pares</option>
+                                <option value="impar">Ímpares</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ETAPA 2 -->
+                <div id="stepContent2" class="step-content" style="display:none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="font-size: 0.9em; color: var(--text-muted);" id="contadorPostos">Total: 3</span>
+                        <button class="btn btn-success" onclick="adicionarPosto()">+ Adicionar Posto</button>
+                    </div>
+                    <div id="listaPostos" class="dynamic-list"></div>
+                </div>
+
+                <!-- ETAPA 3 -->
+                <div id="stepContent3" class="step-content" style="display:none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="font-size: 0.9em; color: var(--text-muted);">Equipe de Plantão</span>
+                        <button class="btn btn-success" onclick="adicionarColaborador()">+ Adicionar Colaborador</button>
+                    </div>
+                    <div id="listaColaboradores" class="dynamic-list"></div>
+                </div>
+
+                <!-- ETAPA 4 -->
+                <div id="stepContent4" class="step-content" style="display:none;">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="textoApoioGlobal">Mensagem de Apoio:</label>
+                            <input type="text" id="textoApoioGlobal" value="Apoio" placeholder="Ex: Reforço Operacional" onchange="salvarEstado()">
+                        </div>
+                        <div class="input-group" style="margin-top: 8px;">
+                            <label>Exibir nos Postos:</label>
+                            <div id="selectorPostosApoio" class="chips-selector"></div>
+                        </div>
+                        <div class="input-group" style="margin-top: 8px;">
+                            <label>Exibir nos Dias:</label>
+                            <div class="chips-selector">
+                                <label class="chip-item"><input type="checkbox" class="chk-dia-apoio" value="0" onchange="salvarEstado()"> Dom</label>
+                                <label class="chip-item"><input type="checkbox" class="chk-dia-apoio" value="1" onchange="salvarEstado()"> Seg</label>
+                                <label class="chip-item"><input type="checkbox" class="chk-dia-apoio" value="2" onchange="salvarEstado()"> Ter</label>
+                                <label class="chip-item"><input type="checkbox" class="chk-dia-apoio" value="3" onchange="salvarEstado()"> Qua</label>
+                                <label class="chip-item"><input type="checkbox" class="chk-dia-apoio" value="4" onchange="salvarEstado()"> Qui</label>
+                                <label class="chip-item"><input type="checkbox" class="chk-dia-apoio" value="5" onchange="salvarEstado()"> Sex</label>
+                                <label class="chip-item"><input type="checkbox" class="chk-dia-apoio" value="6" onchange="salvarEstado()"> Sáb</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wizard-nav">
+                    <button class="btn btn-secondary" id="btnVoltarWizard" onclick="voltarPassoOrHome()">Voltar</button>
+                    <button class="btn btn-primary" id="btnAvancarWizard" onclick="avancarPassoOrGerar()">Próximo</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- VIEW 3: TELA DE RESULTADO (ESCALA GERADA) -->
+        <div id="viewResultado" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <button class="btn btn-secondary" onclick="irParaHome()">← Voltar ao Painel</button>
+                <span style="font-size: 0.9em; color: var(--accent-cyan); font-weight: 600;" id="labelResultadoMes">Janeiro / 2026</span>
+            </div>
+
+            <div id="resultadoTabelaContainer"></div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="abrirTabelaEmNovaAba()">👁️ Visualizar Completa (Nova Aba)</button>
+                <button class="btn btn-secondary" onclick="baixarEscalaPDF()">📄 Baixar Escala em PDF</button>
             </div>
         </div>
 
-        <button class="btn btn-pulse" style="width: 100%; padding: 14px; font-size: 16px;" onclick="gerarEscala()">Gerar Escala de Trabalho</button>
-
-        <div id="wrapperResultado" style="margin-top: 20px;">
-            <div id="resultado"></div>
-        </div>
-
-        <div id="btnContainer" class="btn-action-group" style="display:none;">
-            <button id="btnVisualizarAba" class="btn-view" onclick="abrirTabelaEmNovaAba()">Visualizar Tabela Completa</button>
-            <button id="btnBaixar" class="btn-secondary" onclick="baixarEscalaPDF()">Baixar Escala Completa em PDF</button>
-        </div>
+        <footer>© 2026 Desenvolvido por C.D. | Todos os direitos reservados.</footer>
     </div>
 
-    <footer>© 2026 Desenvolvido por C.D. | Todos os direitos reservados.</footer>
-
     <script>
+        // ESTADO GLOBAL
+        let passoAtual = 1;
+
         let postos = [
             { id: "p1", nome: "Portaria 1 Ronda", bloqueadoMax1: false },
             { id: "p2", nome: "Portaria 2 Interno", bloqueadoMax1: false },
@@ -606,18 +697,81 @@
 
         let postosApoioAtivos = ["p1", "p2", "p3"];
 
+        const titulosEtapas = {
+            1: "Etapa 1 — Período e Paridade",
+            2: "Etapa 2 — Postos de Trabalho",
+            3: "Etapa 3 — Colaboradores e Regras",
+            4: "Etapa 4 — Informação de Apoio"
+        };
+
         window.onload = function() {
             carregarEstado();
             renderizarPostos();
             renderizarColaboradores();
             renderizarSeletorPostosApoio();
-            inicializarDragAndDrop();
+            atualizarResumosHome();
         };
 
-        function fecharModal() {
-            document.getElementById("modalAtualizacao").style.display = "none";
+        // ROTEAMENTO DE VIEWS
+        function mostrarView(viewId) {
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        function irParaHome() {
+            atualizarResumosHome();
+            mostrarView('viewHome');
+        }
+
+        function abrirEtapaWizard(passo) {
+            irParaPasso(passo);
+            mostrarView('viewWizard');
+        }
+
+        // CONTROLADOR DO STEPPER (BOLINHAS 1 A 4)
+        function irParaPasso(p) {
+            passoAtual = p;
+
+            // Esconde conteúdos anteriores
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`stepContent${i}`).style.display = 'none';
+                const ball = document.getElementById(`ball${i}`);
+                ball.classList.remove('active', 'completed');
+                if (i < p) ball.classList.add('completed');
+            }
+
+            // Exibe o atual
+            document.getElementById(`stepContent${p}`).style.display = 'block';
+            document.getElementById(`ball${p}`).classList.add('active');
+            document.getElementById('stepTitle').textContent = titulosEtapas[p];
+
+            // Atualiza barra de progresso
+            const pct = ((p - 1) / 3) * 100;
+            document.getElementById('stepperProgress').style.width = pct + '%';
+
+            // Ajusta botões
+            document.getElementById('btnVoltarWizard').textContent = p === 1 ? 'Painel Principal' : 'Voltar';
+            document.getElementById('btnAvancarWizard').textContent = p === 4 ? 'Gerar Escala 🚀' : 'Próximo';
+        }
+
+        function avancarPassoOrGerar() {
+            if (passoAtual < 4) {
+                irParaPasso(passoAtual + 1);
+            } else {
+                executarGeracaoEscala();
+            }
+        }
+
+        function voltarPassoOrHome() {
+            if (passoAtual > 1) {
+                irParaPasso(passoAtual - 1);
+            } else {
+                irParaHome();
+            }
+        }
+
+        // SALVAMENTO LOCAL
         function salvarEstado() {
             const diasApoio = Array.from(document.querySelectorAll('.chk-dia-apoio:checked')).map(cb => parseInt(cb.value));
             const postosApoio = Array.from(document.querySelectorAll('.chk-posto-apoio:checked')).map(cb => cb.value);
@@ -631,25 +785,22 @@
                 postos: postos,
                 colaboradores: colaboradores
             };
-            localStorage.setItem("escala_dados_v2_1", JSON.stringify(dados));
+            localStorage.setItem("escala_dados_v3", JSON.stringify(dados));
+            atualizarResumosHome();
         }
 
         function carregarEstado() {
-            const salvo = localStorage.getItem("escala_dados_v2_1");
+            const salvo = localStorage.getItem("escala_dados_v3");
             if (salvo) {
                 try {
                     const dados = JSON.parse(salvo);
                     if (dados.mes !== undefined) document.getElementById("mes").value = dados.mes;
                     if (dados.inicioDia) document.getElementById("inicioDia").value = dados.inicioDia;
                     if (dados.textoApoioGlobal !== undefined) document.getElementById("textoApoioGlobal").value = dados.textoApoioGlobal;
-                    
+
                     if (Array.isArray(dados.diasApoio)) {
                         document.querySelectorAll('.chk-dia-apoio').forEach(cb => {
                             cb.checked = dados.diasApoio.includes(parseInt(cb.value));
-                        });
-                    } else {
-                        document.querySelectorAll('.chk-dia-apoio').forEach(cb => {
-                            cb.checked = (cb.value === "0" || cb.value === "6");
                         });
                     }
 
@@ -657,7 +808,7 @@
                     if (Array.isArray(dados.colaboradores)) colaboradores = dados.colaboradores;
                     if (Array.isArray(dados.postosApoioAtivos)) postosApoioAtivos = dados.postosApoioAtivos;
                 } catch (e) {
-                    console.error("Erro ao carregar dados", e);
+                    console.error("Erro ao carregar cache local", e);
                 }
             } else {
                 document.querySelectorAll('.chk-dia-apoio').forEach(cb => {
@@ -666,6 +817,21 @@
             }
         }
 
+        // ATUALIZAÇÃO DOS CARDS NA HOME
+        function atualizarResumosHome() {
+            const mesSelect = document.getElementById("mes");
+            const mesTexto = mesSelect.options[mesSelect.selectedIndex] ? mesSelect.options[mesSelect.selectedIndex].text : "Janeiro";
+            const paridade = document.getElementById("inicioDia").value === "par" ? "Dias Pares" : "Dias Ímpares";
+            
+            document.getElementById("summaryCard1").textContent = `${mesTexto} (${paridade})`;
+            document.getElementById("summaryCard2").textContent = `${postos.length} Posto(s)`;
+            document.getElementById("summaryCard3").textContent = `${colaboradores.length} Colaborador(es)`;
+
+            const textoApoio = document.getElementById("textoApoioGlobal").value || "Apoio";
+            document.getElementById("summaryCard4").textContent = `Mensagem: "${textoApoio}"`;
+        }
+
+        // RENDERIZADORES DE LISTAS
         function renderizarPostos() {
             const container = document.getElementById("listaPostos");
             container.innerHTML = "";
@@ -675,25 +841,21 @@
                 if (!p.id) p.id = "p_" + Date.now() + "_" + index;
                 const item = document.createElement("div");
                 item.className = "dynamic-item posto-item";
-                item.draggable = true;
-                item.dataset.index = index;
-                item.dataset.type = "posto";
 
                 item.innerHTML = `
-                    <div class="drag-handle" title="Arraste para mover">⇳</div>
+                    <div class="drag-handle">⇳</div>
                     <div class="input-group">
                         <label>Nome do Posto</label>
-                        <input type="text" value="${p.nome}" placeholder="Nome do Posto" onchange="atualizarPosto(${index}, 'nome', this.value)">
+                        <input type="text" value="${p.nome}" onchange="atualizarPosto(${index}, 'nome', this.value)">
                     </div>
-                    <label class="checkbox-container" style="margin-top: 18px;">
+                    <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.85em;">
                         <input type="checkbox" ${p.bloqueadoMax1 ? 'checked' : ''} onchange="atualizarPosto(${index}, 'bloqueadoMax1', this.checked)">
-                        Máx. 1 Colab.
+                        Máx 1 Colab.
                     </label>
-                    <button class="btn btn-danger" style="margin-top: 18px;" onclick="removerPosto(${index})">Remover</button>
+                    <button class="btn btn-danger" onclick="removerPosto(${index})">×</button>
                 `;
                 container.appendChild(item);
             });
-            
             renderizarColaboradores();
             renderizarSeletorPostosApoio();
             salvarEstado();
@@ -701,11 +863,7 @@
 
         function adicionarPosto() {
             const novoId = "p_" + Date.now();
-            postos.push({
-                id: novoId,
-                nome: `Novo Posto ${postos.length + 1}`,
-                bloqueadoMax1: false
-            });
+            postos.push({ id: novoId, nome: `Novo Posto ${postos.length + 1}`, bloqueadoMax1: false });
             postosApoioAtivos.push(novoId);
             renderizarPostos();
         }
@@ -718,10 +876,7 @@
         }
 
         function removerPosto(index) {
-            if (postos.length <= 1) {
-                alert("A escala precisa ter pelo menos 1 posto!");
-                return;
-            }
+            if (postos.length <= 1) return alert("Mantenha ao menos 1 posto.");
             const removido = postos.splice(index, 1)[0];
             postosApoioAtivos = postosApoioAtivos.filter(id => id !== removido.id);
             renderizarPostos();
@@ -730,15 +885,11 @@
         function renderizarSeletorPostosApoio() {
             const container = document.getElementById("selectorPostosApoio");
             container.innerHTML = "";
-
             postos.forEach(p => {
                 const checked = postosApoioAtivos.includes(p.id) ? "checked" : "";
                 const label = document.createElement("label");
                 label.className = "chip-item";
-                label.innerHTML = `
-                    <input type="checkbox" class="chk-posto-apoio" value="${p.id}" ${checked} onchange="salvarEstado()">
-                    ${p.nome}
-                `;
+                label.innerHTML = `<input type="checkbox" class="chk-posto-apoio" value="${p.id}" ${checked} onchange="salvarEstado()"> ${p.nome}`;
                 container.appendChild(label);
             });
         }
@@ -750,9 +901,6 @@
             colaboradores.forEach((colab, index) => {
                 const item = document.createElement("div");
                 item.className = "dynamic-item colab-item";
-                item.draggable = true;
-                item.dataset.index = index;
-                item.dataset.type = "colab";
 
                 let opcoesPosto = postos.map(p => `<option value="${p.nome}" ${colab.postoFixo === p.nome ? 'selected' : ''}>${p.nome}</option>`).join("");
                 let outrosColabs = colaboradores
@@ -761,30 +909,28 @@
                     .join("");
 
                 item.innerHTML = `
-                    <div class="drag-handle" title="Arraste para mover">⇳</div>
+                    <div class="drag-handle">⇳</div>
                     <div class="input-group">
-                        <label>Nome do Colaborador</label>
-                        <input type="text" value="${colab.nome}" placeholder="Nome" onchange="atualizarColab(${index}, 'nome', this.value)">
+                        <label>Nome</label>
+                        <input type="text" value="${colab.nome}" onchange="atualizarColab(${index}, 'nome', this.value)">
                     </div>
                     <div class="input-group">
-                        <label>Regra na Escala</label>
+                        <label>Regra</label>
                         <select onchange="atualizarColab(${index}, 'tipo', this.value)">
-                            <option value="rotativo" ${colab.tipo === 'rotativo' ? 'selected' : ''}>Rotativo Aleatório</option>
+                            <option value="rotativo" ${colab.tipo === 'rotativo' ? 'selected' : ''}>Rotativo</option>
                             <option value="fixo" ${colab.tipo === 'fixo' ? 'selected' : ''}>Fixo no Posto</option>
-                            <option value="par" ${colab.tipo === 'par' ? 'selected' : ''}>Rotativo junto com...</option>
+                            <option value="par" ${colab.tipo === 'par' ? 'selected' : ''}>Par com...</option>
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>Detalhe da Regra</label>
+                        <label>Detalhes</label>
                         ${colab.tipo === 'fixo' 
                             ? `<select onchange="atualizarColab(${index}, 'postoFixo', this.value)">${opcoesPosto}</select>`
                             : colab.tipo === 'par'
-                            ? `<select onchange="atualizarColab(${index}, 'parNome', this.value)"><option value="">Selecione o Par</option>${outrosColabs}</select>`
-                            : `<input type="text" value="Gira entre postos disponíveis" disabled>`}
+                            ? `<select onchange="atualizarColab(${index}, 'parNome', this.value)"><option value="">Selecione Par</option>${outrosColabs}</select>`
+                            : `<input type="text" value="Giro entre postos" disabled>`}
                     </div>
-                    <div class="input-group" style="justify-content: flex-end;">
-                        <button class="btn btn-danger" style="margin-top: 18px;" onclick="removerColaborador(${index})">Remover</button>
-                    </div>
+                    <button class="btn btn-danger" onclick="removerColaborador(${index})">×</button>
                 `;
                 container.appendChild(item);
             });
@@ -792,109 +938,32 @@
         }
 
         function adicionarColaborador() {
-            colaboradores.push({
-                nome: `Colaborador ${colaboradores.length + 1}`,
-                tipo: "rotativo",
-                postoFixo: postos[0] ? postos[0].nome : "",
-                parNome: ""
-            });
+            colaboradores.push({ nome: `Colaborador ${colaboradores.length + 1}`, tipo: "rotativo", postoFixo: postos[0] ? postos[0].nome : "", parNome: "" });
             renderizarColaboradores();
         }
 
         function atualizarColab(index, campo, valor) {
             colaboradores[index][campo] = valor;
-            if (campo === 'tipo' && valor === 'fixo' && !colaboradores[index].postoFixo && postos.length > 0) {
-                colaboradores[index].postoFixo = postos[0].nome;
-            }
             renderizarColaboradores();
         }
 
         function removerColaborador(index) {
-            if (colaboradores.length <= 1) {
-                alert("É necessário ter ao menos 1 colaborador!");
-                return;
-            }
+            if (colaboradores.length <= 1) return alert("Mantenha ao menos 1 colaborador.");
             colaboradores.splice(index, 1);
             renderizarColaboradores();
         }
 
-        function inicializarDragAndDrop() {
-            ['listaPostos', 'listaColaboradores'].forEach(containerId => {
-                const container = document.getElementById(containerId);
-                let itemArrastado = null;
-
-                container.addEventListener('dragstart', (e) => {
-                    const card = e.target.closest('.dynamic-item');
-                    if (card) {
-                        itemArrastado = card;
-                        card.classList.add('dragging');
-                    }
-                });
-
-                container.addEventListener('dragend', (e) => {
-                    const card = e.target.closest('.dynamic-item');
-                    if (card) {
-                        card.classList.remove('dragging');
-                        
-                        const tipo = card.dataset.type;
-                        const elementosDom = [...container.querySelectorAll('.dynamic-item')];
-
-                        if (tipo === 'posto') {
-                            const novosPostos = elementosDom.map(el => postos[parseInt(el.dataset.index)]);
-                            postos = novosPostos;
-                            renderizarPostos();
-                        } else if (tipo === 'colab') {
-                            const novosColabs = elementosDom.map(el => colaboradores[parseInt(el.dataset.index)]);
-                            colaboradores = novosColabs;
-                            renderizarColaboradores();
-                        }
-                        itemArrastado = null;
-                    }
-                });
-
-                container.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    if (!itemArrastado) return;
-
-                    const elementoAbaixo = obterElementoAbaixo(container, e.clientY);
-                    if (elementoAbaixo == null) {
-                        container.appendChild(itemArrastado);
-                    } else {
-                        container.insertBefore(itemArrastado, elementoAbaixo);
-                    }
-                });
-            });
-        }
-
-        function obterElementoAbaixo(container, y) {
-            const elementos = [...container.querySelectorAll('.dynamic-item:not(.dragging)')];
-
-            return elementos.reduce((proximo, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-                if (offset < 0 && offset > proximo.offset) {
-                    return { offset: offset, element: child };
-                } else {
-                    return proximo;
-                }
-            }, { offset: Number.NEGATIVE_INFINITY }).element;
-        }
-
-        function gerarEscala() {
+        // MOTOR DE GERAÇÃO DA ESCALA
+        function executarGeracaoEscala() {
             const mes = parseInt(document.getElementById("mes").value);
             const inicioDia = document.getElementById("inicioDia").value;
             const textoApoioGlobal = document.getElementById("textoApoioGlobal").value || "Apoio";
-            
+
             const diasApoioMarcados = Array.from(document.querySelectorAll('.chk-dia-apoio:checked')).map(cb => parseInt(cb.value));
             const postosApoioMarcados = Array.from(document.querySelectorAll('.chk-posto-apoio:checked')).map(cb => cb.value);
-            
+
             const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
             const numDias = new Date(2026, mes + 1, 0).getDate();
-
-            if (postos.length === 0 || colaboradores.length === 0) {
-                alert("Configure ao menos um posto e um colaborador.");
-                return;
-            }
 
             let stats = {};
             colaboradores.forEach(c => {
@@ -925,9 +994,7 @@
                         if (c.tipo === "fixo" && c.postoFixo) {
                             if (atribuicaoDia[c.postoFixo]) {
                                 atribuicaoDia[c.postoFixo].push(c.nome);
-                                if (stats[c.nome] && stats[c.nome][c.postoFixo] !== undefined) {
-                                    stats[c.nome][c.postoFixo]++;
-                                }
+                                if (stats[c.nome] && stats[c.nome][c.postoFixo] !== undefined) stats[c.nome][c.postoFixo]++;
                             }
                             return false;
                         }
@@ -935,9 +1002,7 @@
                     });
 
                     let postosDisponiveisParaGiro = postos.filter(p => {
-                        if (p.bloqueadoMax1 && atribuicaoDia[p.nome].length >= 1) {
-                            return false; 
-                        }
+                        if (p.bloqueadoMax1 && atribuicaoDia[p.nome].length >= 1) return false;
                         return true;
                     });
 
@@ -949,9 +1014,7 @@
                                 const parColab = colaboradores.find(item => item.nome === c.parNome);
                                 if (parColab && parColab.postoFixo && atribuicaoDia[parColab.postoFixo]) {
                                     const objPostoPar = postos.find(p => p.nome === parColab.postoFixo);
-                                    if (!objPostoPar || !objPostoPar.bloqueadoMax1) {
-                                        postoDesignado = parColab.postoFixo;
-                                    }
+                                    if (!objPostoPar || !objPostoPar.bloqueadoMax1) postoDesignado = parColab.postoFixo;
                                 }
                             }
 
@@ -962,9 +1025,7 @@
 
                             if (atribuicaoDia[postoDesignado]) {
                                 atribuicaoDia[postoDesignado].push(c.nome);
-                                if (stats[c.nome] && stats[c.nome][postoDesignado] !== undefined) {
-                                    stats[c.nome][postoDesignado]++;
-                                }
+                                if (stats[c.nome] && stats[c.nome][postoDesignado] !== undefined) stats[c.nome][postoDesignado]++;
                             }
                         }
                     });
@@ -975,14 +1036,13 @@
                     postos.forEach(p => {
                         let temColaborador = atribuicaoDia[p.nome].length > 0;
                         let celulaTexto = temColaborador ? atribuicaoDia[p.nome].join(", ") : "<em>Livre</em>";
-                        
                         const postoAtivoParaApoio = postosApoioMarcados.includes(p.id);
 
                         if (eDiaDeApoio && postoAtivoParaApoio) {
                             celulaTexto += ` <span class="support-badge">[${textoApoioGlobal}]</span>`;
                         }
 
-                        htmlTabela += `<td contenteditable="true" class="editable-cell">${celulaTexto}</td>`;
+                        htmlTabela += `<td contenteditable="true">${celulaTexto}</td>`;
                     });
 
                     htmlTabela += '</tr>';
@@ -992,9 +1052,9 @@
 
             htmlTabela += '</tbody></table></div>';
 
-            let htmlStats = '<div class="stats-container" id="secaoEstatistica"><h2>Contagem de Turnos por Posto</h2><div class="stats-grid">';
+            let htmlStats = '<div class="stats-container"><h2>Resumo de Turnos</h2><div class="stats-grid">';
             colaboradores.forEach(c => {
-                htmlStats += `<div class="stat-card"><h3>${c.nome || 'Sem nome'}</h3><ul>`;
+                htmlStats += `<div class="stat-card"><strong>${c.nome || 'Sem nome'}</strong><ul style="margin-top:6px; padding-left:16px; font-size:0.85em;">`;
                 postos.forEach(p => {
                     htmlStats += `<li>${p.nome}: ${stats[c.nome] ? stats[c.nome][p.nome] : 0}</li>`;
                 });
@@ -1002,18 +1062,18 @@
             });
             htmlStats += '</div></div>';
 
-            document.getElementById("resultado").innerHTML = htmlTabela + htmlStats;
-            document.getElementById("btnContainer").style.display = "grid";
-            document.getElementById("resultado").scrollIntoView({ behavior: "smooth" });
+            document.getElementById("resultadoTabelaContainer").innerHTML = htmlTabela + htmlStats;
+
+            const mesSelect = document.getElementById("mes");
+            document.getElementById("labelResultadoMes").textContent = `${mesSelect.options[mesSelect.selectedIndex].text} / 2026`;
+
+            mostrarView('viewResultado');
         }
 
-        /* FUNÇÃO DA NOVA ABA: ESTILOS DEDICADOS COM QUEBRA DE LINHA E AJUSTE 100% PARA MOBILE */
+        // ABRIR EM NOVA ABA (BLOB RESPONSIVO COMPLETO)
         function abrirTabelaEmNovaAba() {
             const tabelaElemento = document.getElementById("tabelaEscala");
-            if (!tabelaElemento) {
-                alert("Gere a escala primeiro!");
-                return;
-            }
+            if (!tabelaElemento) return alert("Gere a escala primeiro!");
 
             const tabelaHtml = tabelaElemento.outerHTML;
             const mesTexto = document.getElementById("mes").options[document.getElementById("mes").selectedIndex].text;
@@ -1026,95 +1086,18 @@
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <title>Escala Completa - ${mesTexto} / 2026</title>
                     <style>
-                        * {
-                            box-sizing: border-box;
-                            margin: 0;
-                            padding: 0;
-                        }
-                        html, body {
-                            width: 100%;
-                            min-height: 100vh;
-                            background-color: #ffffff;
-                        }
-                        body {
-                            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-                            padding: 8px;
-                            color: #1e293b;
-                        }
-                        .header {
-                            text-align: center;
-                            margin-bottom: 12px;
-                            padding-bottom: 8px;
-                            border-bottom: 1px solid #e2e8f0;
-                        }
-                        h1 { 
-                            font-size: 18px; 
-                            color: #0f172a; 
-                            margin-bottom: 2px;
-                            font-weight: 700;
-                        }
-                        p { 
-                            color: #64748b; 
-                            font-size: 12px; 
-                        }
-                        
-                        .table-container {
-                            width: 100%;
-                        }
-
-                        table {
-                            width: 100%;
-                            border-collapse: collapse;
-                            font-size: 11px;
-                            text-align: center;
-                            table-layout: fixed;
-                        }
-
-                        th, td {
-                            border: 1px solid #cbd5e1;
-                            padding: 6px 3px;
-                            white-space: normal !important;
-                            word-break: break-word !important;
-                            overflow-wrap: break-word !important;
-                        }
-
-                        th {
-                            background-color: #1e293b;
-                            color: #ffffff;
-                            font-weight: 600;
-                            font-size: 11px;
-                            text-transform: uppercase;
-                        }
-
-                        tr:nth-child(even) td { 
-                            background-color: #f8fafc; 
-                        }
-
-                        tr.has-support td { 
-                            background-color: #fef2f2; 
-                        }
-
-                        .support-badge {
-                            background-color: #fee2e2;
-                            color: #dc2626;
-                            font-size: 9px;
-                            font-weight: bold;
-                            padding: 1px 3px;
-                            border-radius: 3px;
-                            display: inline-block;
-                            margin-top: 2px;
-                        }
-
-                        .footer {
-                            margin-top: 16px;
-                            text-align: center;
-                            font-size: 10px;
-                            color: #94a3b8;
-                        }
-
-                        @media print {
-                            body { padding: 0; }
-                        }
+                        * { box-sizing: border-box; margin: 0; padding: 0; }
+                        body { font-family: system-ui, -apple-system, sans-serif; padding: 12px; color: #1e293b; background: #fff; }
+                        .header { text-align: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; }
+                        h1 { font-size: 18px; color: #0f172a; }
+                        p { color: #64748b; font-size: 12px; }
+                        table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: center; table-layout: fixed; }
+                        th, td { border: 1px solid #cbd5e1; padding: 6px 3px; white-space: normal !important; word-break: break-word !important; }
+                        th { background-color: #1e293b; color: #ffffff; text-transform: uppercase; }
+                        tr:nth-child(even) td { background-color: #f8fafc; }
+                        tr.has-support td { background-color: #fef2f2; }
+                        .support-badge { background-color: #fee2e2; color: #dc2626; font-size: 9px; font-weight: bold; padding: 1px 3px; border-radius: 3px; }
+                        .footer { margin-top: 16px; text-align: center; font-size: 10px; color: #94a3b8; }
                     </style>
                 </head>
                 <body>
@@ -1122,25 +1105,20 @@
                         <h1>Escala de Trabalho 12x36</h1>
                         <p>Mês de Referência: ${mesTexto} / 2026</p>
                     </div>
-                    <div class="table-container">
-                        ${tabelaHtml}
-                    </div>
-                    <div class="footer">
-                        © 2026 Desenvolvido por C.D. | Todos os direitos reservados.
-                    </div>
+                    ${tabelaHtml}
+                    <div class="footer">© 2026 Desenvolvido por C.D. | Todos os direitos reservados.</div>
                 </body>
                 </html>
             `;
 
             const blob = new Blob([documentoCompleto], { type: "text/html;charset=utf-8" });
-            const urlBlob = URL.createObjectURL(blob);
-            window.open(urlBlob, "_blank");
+            window.open(URL.createObjectURL(blob), "_blank");
         }
 
+        // GERAR PDF
         function baixarEscalaPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF("l", "pt", "a4");
-
             const mesTexto = document.getElementById("mes").options[document.getElementById("mes").selectedIndex].text;
 
             doc.setFont("Helvetica", "bold");
@@ -1157,48 +1135,12 @@
                 html: '#tabelaEscala',
                 startY: 70,
                 theme: 'grid',
-                styles: {
-                    fontSize: 8,
-                    cellPadding: 6,
-                    valign: 'middle',
-                    halign: 'center',
-                    overflow: 'linebreak'
-                },
-                headStyles: {
-                    fillColor: [30, 41, 59],
-                    textColor: [255, 255, 255],
-                    fontStyle: 'bold',
-                    fontSize: 9
-                },
-                alternateRowStyles: {
-                    fillColor: [248, 250, 252]
-                },
-                didParseCell: function (data) {
-                    if (data.cell.raw && data.cell.raw.innerText) {
-                        data.cell.text = data.cell.raw.innerText.replace(/\n/g, ' ');
-                    }
-                }
+                styles: { fontSize: 8, cellPadding: 6, valign: 'middle', halign: 'center' },
+                headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold' }
             });
-
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(8);
-                doc.setTextColor(148, 163, 184);
-                doc.text(`Página ${i} de ${pageCount} - © 2026 Desenvolvido por C.D. | Todos os direitos reservados.`, 40, 575);
-            }
 
             doc.save(`escala_12x36_${mesTexto.toLowerCase()}_2026.pdf`);
         }
-
-        document.addEventListener("contextmenu", e => e.preventDefault());
-        document.onkeydown = function(e) {
-            if (e.keyCode === 123 || 
-               (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 67 || e.keyCode === 74)) || 
-               (e.ctrlKey && e.keyCode === 85)) {
-                return false;
-            }
-        };
     </script>
 </body>
 </html>
