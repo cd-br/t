@@ -609,9 +609,9 @@
                 <p>Confira as novidades aplicadas nesta versão do sistema:</p>
                 <ul>
                     <li><strong>Layout Responsivo Avançado:</strong> Experiência visual ampla e otimizada para monitores e telas de PC.</li>
-                    <li><strong>Botoes Limpos:</strong> Exportação para PDF e Nova Aba com visual direto.</li>
-                    <li><strong>Clareza nas Ações:</strong> Botões de exclusão de postos e equipe atualizados para "Remover".</li>
-                    <li><strong>Wizard em Bolinhas:</strong> Navegação 100% clicável pelas etapas no topo.</li>
+                    <li><strong>Aba Dedicada Premium:</strong> Visualização completa em tema escuro com transparências.</li>
+                    <li><strong>PDF Executivo:</strong> Estilização aprimorada de impressão com cabeçalho destacado.</li>
+                    <li><strong>Clareza nas Ações:</strong> Botões de exclusão e exportação atualizados e limpos.</li>
                 </ul>
             </div>
             <button class="btn btn-primary" style="width: 100%;" onclick="fecharModal()">Continuar</button>
@@ -1196,7 +1196,7 @@
             mostrarView('viewResultado');
         }
 
-        // ABRIR EM NOVA ABA (SEM ÍCONE NO BOTÃO)
+        // ABRIR EM NOVA ABA (TEMA DARK VIVO E PREMIUM)
         function abrirTabelaEmNovaAba() {
             const tabelaElemento = document.getElementById("tabelaEscala");
             if (!tabelaElemento) return alert("Gere a escala primeiro!");
@@ -1212,18 +1212,84 @@
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <title>Escala Completa - ${mesTexto} / 2026</title>
                     <style>
-                        * { box-sizing: border-box; margin: 0; padding: 0; }
-                        body { font-family: system-ui, -apple-system, sans-serif; padding: 16px; color: #1e293b; background: #fff; }
-                        .header { text-align: center; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0; }
-                        h1 { font-size: 20px; color: #0f172a; }
-                        p { color: #64748b; font-size: 13px; }
-                        table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: center; table-layout: fixed; }
-                        th, td { border: 1px solid #cbd5e1; padding: 8px 4px; white-space: normal !important; word-break: break-word !important; }
-                        th { background-color: #1e293b; color: #ffffff; text-transform: uppercase; }
-                        tr:nth-child(even) td { background-color: #f8fafc; }
-                        tr.has-support td { background-color: #fef2f2; }
-                        .support-badge { background-color: #fee2e2; color: #dc2626; font-size: 9px; font-weight: bold; padding: 2px 4px; border-radius: 3px; }
-                        .footer { margin-top: 20px; text-align: center; font-size: 11px; color: #94a3b8; }
+                        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+                        body { 
+                            background-color: #0f172a; 
+                            color: #f8fafc; 
+                            padding: 24px 16px; 
+                            min-height: 100vh;
+                        }
+                        .header { 
+                            text-align: center; 
+                            margin-bottom: 24px; 
+                            padding-bottom: 16px; 
+                            border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+                        }
+                        h1 { 
+                            font-size: 22px; 
+                            font-weight: 800;
+                            background: linear-gradient(135deg, #ffffff 0%, #06b6d4 50%, #3b82f6 100%);
+                            -webkit-background-clip: text;
+                            background-clip: text;
+                            color: transparent;
+                            margin-bottom: 4px;
+                        }
+                        p { color: #94a3b8; font-size: 13px; }
+                        .table-container {
+                            width: 100%;
+                            background: rgba(30, 41, 59, 0.7);
+                            border: 1px solid rgba(255, 255, 255, 0.1);
+                            border-radius: 16px;
+                            backdrop-filter: blur(12px);
+                            overflow: hidden;
+                        }
+                        table { 
+                            width: 100%; 
+                            border-collapse: collapse; 
+                            font-size: 12px; 
+                            text-align: center; 
+                            table-layout: fixed; 
+                        }
+                        th, td { 
+                            border: 1px solid rgba(255, 255, 255, 0.08); 
+                            padding: 10px 6px; 
+                            white-space: normal !important; 
+                            word-break: break-word !important; 
+                            overflow-wrap: break-word !important;
+                        }
+                        th { 
+                            background-color: rgba(15, 23, 42, 0.9); 
+                            color: #06b6d4; 
+                            text-transform: uppercase; 
+                            font-weight: 700;
+                            font-size: 11px;
+                            letter-spacing: 0.05em;
+                        }
+                        td { background-color: rgba(30, 41, 59, 0.4); }
+                        tr:nth-child(even) td { background-color: rgba(15, 23, 42, 0.25); }
+                        tr.has-support td { background-color: rgba(244, 63, 94, 0.15); }
+                        .support-badge { 
+                            background-color: rgba(244, 63, 94, 0.2); 
+                            color: #f43f5e; 
+                            font-size: 9px; 
+                            font-weight: bold; 
+                            padding: 2px 5px; 
+                            border-radius: 4px; 
+                            display: inline-block;
+                            margin-top: 2px;
+                        }
+                        .footer { 
+                            margin-top: 28px; 
+                            text-align: center; 
+                            font-size: 11px; 
+                            color: #64748b; 
+                        }
+                        @media print {
+                            body { background: #fff; color: #000; }
+                            .table-container { border: none; }
+                            th { background: #1e293b !important; color: #fff !important; }
+                            td { background: #fff !important; color: #000 !important; }
+                        }
                     </style>
                 </head>
                 <body>
@@ -1231,7 +1297,9 @@
                         <h1>Escala de Trabalho 12x36</h1>
                         <p>Mês de Referência: ${mesTexto} / 2026</p>
                     </div>
-                    ${tabelaHtml}
+                    <div class="table-container">
+                        ${tabelaHtml}
+                    </div>
                     <div class="footer">© 2026 Desenvolvido por C.D. | Todos os direitos reservados.</div>
                 </body>
                 </html>
@@ -1241,29 +1309,68 @@
             window.open(URL.createObjectURL(blob), "_blank");
         }
 
-        // GERAR PDF (SEM ÍCONE NO BOTÃO)
+        // GERAR PDF COM ESTILO EXECUTIVO PREMIUM
         function baixarEscalaPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF("l", "pt", "a4");
             const mesTexto = document.getElementById("mes").options[document.getElementById("mes").selectedIndex].text;
 
-            doc.setFont("Helvetica", "bold");
-            doc.setFontSize(18);
-            doc.setTextColor(30, 41, 59);
-            doc.text("Escala de Trabalho 12x36", 40, 40);
+            // Fundo de Cabeçalho do PDF
+            doc.setFillColor(15, 23, 42); // #0f172a
+            doc.rect(0, 0, 842, 60, "F");
 
+            // Título no PDF
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(16);
+            doc.setTextColor(6, 182, 212); // Ciano #06b6d4
+            doc.text("ESCALA DE TRABALHO 12X36", 40, 35);
+
+            // Subtítulo / Mês
             doc.setFont("Helvetica", "normal");
             doc.setFontSize(10);
-            doc.setTextColor(100, 116, 139);
-            doc.text(`Período de Referência: ${mesTexto} / 2026`, 40, 56);
+            doc.setTextColor(248, 250, 252);
+            doc.text(`Período: ${mesTexto} / 2026`, 700, 35);
 
+            // Tabela com autoTable Estilizado
             doc.autoTable({
                 html: '#tabelaEscala',
-                startY: 70,
+                startY: 80,
                 theme: 'grid',
-                styles: { fontSize: 8, cellPadding: 6, valign: 'middle', halign: 'center' },
-                headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold' }
+                styles: { 
+                    fontSize: 8, 
+                    cellPadding: 7, 
+                    valign: 'middle', 
+                    halign: 'center',
+                    textColor: [30, 41, 59],
+                    lineColor: [226, 232, 240],
+                    lineWidth: 0.5
+                },
+                headStyles: { 
+                    fillColor: [30, 41, 59], 
+                    textColor: [255, 255, 255], 
+                    fontStyle: 'bold',
+                    fontSize: 9
+                },
+                alternateRowStyles: { 
+                    fillColor: [248, 250, 252] 
+                },
+                didParseCell: function(data) {
+                    if (data.row.raw && data.row.raw.classList && data.row.raw.classList.contains('has-support')) {
+                        if (data.section === 'body') {
+                            data.cell.styles.fillColor = [254, 242, 242];
+                        }
+                    }
+                }
             });
+
+            // Rodapé das páginas
+            const totalPaginas = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= totalPaginas; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(148, 163, 184);
+                doc.text(`Página ${i} de ${totalPaginas} — © 2026 Desenvolvido por C.D. | Todos os direitos reservados.`, 40, 575);
+            }
 
             doc.save(`escala_12x36_${mesTexto.toLowerCase()}_2026.pdf`);
         }
