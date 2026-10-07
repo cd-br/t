@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Escala 12x36 - v1.3</title>
+    <title>Gerador de Escala 12x36 - v2.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
@@ -174,31 +174,53 @@
         .btn-success { background-color: #10b981; }
         .btn-success:hover { background-color: #059669; }
 
-        .btn-icon {
-            padding: 6px 10px;
-            background-color: #f3f4f6;
-            color: #374151;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 12px;
-            transition: all 0.15s ease;
-        }
-        .btn-icon:hover {
-            background-color: #e5e7eb;
-            color: #111827;
+        .btn-action-group {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 15px;
         }
 
-        .btn-secondary { background-color: #922323; width: 100%; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: 600; color: white; border: none; cursor: pointer; }
-        .btn-secondary:hover { background-color: #111827; }
+        @media (min-width: 600px) {
+            .btn-action-group {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .btn-secondary { 
+            background-color: #1e293b; 
+            width: 100%; 
+            padding: 14px; 
+            border-radius: 10px; 
+            font-size: 15px; 
+            font-weight: 600; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            transition: background 0.2s;
+        }
+        .btn-secondary:hover { background-color: #0f172a; }
+
+        .btn-view {
+            background-color: #0284c7;
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            color: white;
+            border: none;
+            cursor: pointer; 
+            transition: background 0.2s;
+        }
+        .btn-view:hover { background-color: #0369a1; }
 
         @keyframes pulse-subtle {
-            0% { box-shadow: 0 0 0 0 rgba(196, 0, 0, 0.849); }
-            50% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
             100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
         }
-        .btn-secondary { animation: pulse-subtle 3s infinite ease-in-out; }
+        .btn-pulse { animation: pulse-subtle 3s infinite ease-in-out; }
 
         .dynamic-list {
             display: flex;
@@ -216,50 +238,43 @@
             border-radius: 8px;
             border: 1px solid #e5e7eb;
             transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+            touch-action: manipulation;
         }
 
-        /* Estilos de Reordenação e Drag & Drop */
         .dynamic-item.dragging {
             opacity: 0.4;
             border: 2px dashed var(--accent-color);
             background: #eff6ff;
         }
 
-        .drag-controls {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
         .drag-handle {
             cursor: grab;
-            font-size: 18px;
-            color: #9ca3af;
-            padding: 4px 8px;
+            font-size: 20px;
+            color: #6b7280;
+            padding: 8px;
             user-select: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 4px;
-        }
-        .drag-handle:hover {
+            border-radius: 6px;
             background-color: #e5e7eb;
-            color: #374151;
         }
         .drag-handle:active {
             cursor: grabbing;
+            background-color: #d1d5db;
         }
 
-        .posto-item { grid-template-columns: auto auto 2fr auto auto; }
-        .colab-item { grid-template-columns: auto auto 1.5fr 1.2fr 1.5fr auto; }
+        .posto-item { grid-template-columns: auto 2fr auto auto; }
+        .colab-item { grid-template-columns: auto 1.5fr 1.2fr 1.5fr auto; }
 
         @media (max-width: 750px) {
             .posto-item, .colab-item { 
                 grid-template-columns: 1fr; 
             }
-            .drag-controls {
-                justify-content: flex-start;
-                margin-bottom: 4px;
+            .drag-handle {
+                width: 100%;
+                box-sizing: border-box;
+                text-align: center;
             }
         }
 
@@ -317,9 +332,9 @@
             border: 1px solid rgba(220, 38, 38, 0.2);
         }
 
+        /* TABELA DA PÁGINA INICIAL - MANTIDA A ESTRUTURA ORIGINAL COM ROLAGEM HORIZONTAL */
         .table-responsive {
             width: 100%;
-            max-height: 450px;
             overflow-x: auto;
             margin-top: 15px;
             border-radius: var(--border-radius);
@@ -348,9 +363,6 @@
             background-color: #f8fafc;
             color: #475569;
             font-weight: 700;
-            position: sticky;
-            top: 0;
-            z-index: 10;
             border-bottom: 2px solid #e2e8f0;
         }
 
@@ -384,6 +396,76 @@
         .stat-card h3 { margin: 0 0 8px 0; font-size: 1em; color: var(--accent-color); }
         .stat-card ul { margin: 0; padding-left: 18px; color: #4b5563; }
 
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+
+        .modal-card {
+            background: white;
+            max-width: 500px;
+            width: 100%;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.3em;
+            color: #1e293b;
+        }
+
+        .modal-badge {
+            background: #3b82f6;
+            color: white;
+            font-size: 0.75em;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .modal-body {
+            font-size: 0.95em;
+            color: #4b5563;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .modal-body ul {
+            padding-left: 20px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+
+        .modal-body li {
+            margin-bottom: 6px;
+        }
+
         footer {
             margin-top: 24px;
             font-size: 12px;
@@ -395,14 +477,32 @@
 </head>
 <body>
 
+    <div id="modalAtualizacao" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Atualização do Sistema</h2>
+                <span class="modal-badge">v2.1</span>
+            </div>
+            <div class="modal-body">
+                <p>Confira as novidades e melhorias aplicadas nesta versão:</p>
+                <ul>
+                    <li><strong>Drag and Drop Puro:</strong> Reordenação 100% via cliques e arraste (sem botões de setas).</li>
+                    <li><strong>Visualização Vertical Livre:</strong> A tabela agora abre totalmente na vertical para você visualizar todos os dias do mês sem limites de scroll interno.</li>
+                    <li><strong>Rolagem Horizontal Adaptativa:</strong> Mantida no Mobile para garantir leitura perfeita.</li>
+                    <li><strong>Visualizar em Nova Aba:</strong> Novo recurso para abrir a escala aberta por inteiro como documento para leitura ou impressão.</li>
+                </ul>
+            </div>
+            <button class="btn btn-pulse" style="width: 100%; padding: 12px; font-size: 15px;" onclick="fecharModal()">Entendido e Continuar</button>
+        </div>
+    </div>
+
     <div class="main-background">
         <div class="bg-lightning"></div>
     </div>
 
     <div class="container">
-        <h1>Gerador de Escala 12x36</h1>
+        <h1>Gerador de Escala 12x36 - v2.1</h1>
 
-        <!-- 1. PERÍODO -->
         <div class="section-box">
             <div class="section-title">1. Período e Paridade</div>
             <div class="form-grid form-grid-2">
@@ -433,7 +533,6 @@
             </div>
         </div>
 
-        <!-- 2. POSTOS DE TRABALHO -->
         <div class="section-box">
             <div class="section-title">
                 <span>2. Postos de Trabalho <span id="contadorPostos" class="contador-badge">Total: 3</span></span>
@@ -442,7 +541,6 @@
             <div id="listaPostos" class="dynamic-list"></div>
         </div>
 
-        <!-- 3. COLABORADORES E REGRAS -->
         <div class="section-box">
             <div class="section-title">
                 3. Colaboradores e Regras
@@ -451,7 +549,6 @@
             <div id="listaColaboradores" class="dynamic-list"></div>
         </div>
 
-        <!-- 4. CONFIGURAÇÃO DE MENSAGENS E DIAS DE APOIO -->
         <div class="section-box">
             <div class="section-title">4. Configuração da Informação de Apoio</div>
             <div class="form-grid">
@@ -478,13 +575,14 @@
             </div>
         </div>
 
-        <button class="btn" style="width: 100%; padding: 14px; font-size: 16px;" onclick="gerarEscala()">Gerar Escala de Trabalho</button>
+        <button class="btn btn-pulse" style="width: 100%; padding: 14px; font-size: 16px;" onclick="gerarEscala()">Gerar Escala de Trabalho</button>
 
         <div id="wrapperResultado" style="margin-top: 20px;">
             <div id="resultado"></div>
         </div>
 
-        <div id="btnContainer" class="btn-container-download" style="display:none; margin-top: 20px;">
+        <div id="btnContainer" class="btn-action-group" style="display:none;">
+            <button id="btnVisualizarAba" class="btn-view" onclick="abrirTabelaEmNovaAba()">Visualizar Tabela Completa (Nova Aba)</button>
             <button id="btnBaixar" class="btn-secondary" onclick="baixarEscalaPDF()">Baixar Escala Completa em PDF</button>
         </div>
     </div>
@@ -514,6 +612,10 @@
             inicializarDragAndDrop();
         };
 
+        function fecharModal() {
+            document.getElementById("modalAtualizacao").style.display = "none";
+        }
+
         function salvarEstado() {
             const diasApoio = Array.from(document.querySelectorAll('.chk-dia-apoio:checked')).map(cb => parseInt(cb.value));
             const postosApoio = Array.from(document.querySelectorAll('.chk-posto-apoio:checked')).map(cb => cb.value);
@@ -527,11 +629,11 @@
                 postos: postos,
                 colaboradores: colaboradores
             };
-            localStorage.setItem("escala_dados_v1_3", JSON.stringify(dados));
+            localStorage.setItem("escala_dados_v2_1", JSON.stringify(dados));
         }
 
         function carregarEstado() {
-            const salvo = localStorage.getItem("escala_dados_v1_3");
+            const salvo = localStorage.getItem("escala_dados_v2_1");
             if (salvo) {
                 try {
                     const dados = JSON.parse(salvo);
@@ -562,7 +664,6 @@
             }
         }
 
-        // --- RENDERIZAÇÃO E REORDENAÇÃO DE POSTOS ---
         function renderizarPostos() {
             const container = document.getElementById("listaPostos");
             container.innerHTML = "";
@@ -577,11 +678,7 @@
                 item.dataset.type = "posto";
 
                 item.innerHTML = `
-                    <div class="drag-handle" title="Clique e arraste para reordenar">⋮⋮</div>
-                    <div class="drag-controls">
-                        <button class="btn-icon" title="Mover para Cima" onclick="moverItem('posto', ${index}, -1)">▲</button>
-                        <button class="btn-icon" title="Mover para Baixo" onclick="moverItem('posto', ${index}, 1)">▼</button>
-                    </div>
+                    <div class="drag-handle" title="Arraste para mover">☰ Arrastar</div>
                     <div class="input-group">
                         <label>Nome do Posto</label>
                         <input type="text" value="${p.nome}" placeholder="Nome do Posto" onchange="atualizarPosto(${index}, 'nome', this.value)">
@@ -644,7 +741,6 @@
             });
         }
 
-        // --- RENDERIZAÇÃO E REORDENAÇÃO DE COLABORADORES ---
         function renderizarColaboradores() {
             const container = document.getElementById("listaColaboradores");
             container.innerHTML = "";
@@ -663,11 +759,7 @@
                     .join("");
 
                 item.innerHTML = `
-                    <div class="drag-handle" title="Clique e arraste para reordenar">⋮⋮</div>
-                    <div class="drag-controls">
-                        <button class="btn-icon" title="Mover para Cima" onclick="moverItem('colab', ${index}, -1)">▲</button>
-                        <button class="btn-icon" title="Mover para Baixo" onclick="moverItem('colab', ${index}, 1)">▼</button>
-                    </div>
+                    <div class="drag-handle" title="Arraste para mover">☰ Arrastar</div>
                     <div class="input-group">
                         <label>Nome do Colaborador</label>
                         <input type="text" value="${colab.nome}" placeholder="Nome" onchange="atualizarColab(${index}, 'nome', this.value)">
@@ -724,25 +816,6 @@
             renderizarColaboradores();
         }
 
-        // FUNÇÃO PARA REORDENAÇÃO VIA BOTÕES ▲ / ▼
-        function moverItem(tipo, index, direcao) {
-            const arr = tipo === 'posto' ? postos : colaboradores;
-            const novoIndex = index + direcao;
-
-            if (novoIndex < 0 || novoIndex >= arr.length) return;
-
-            const temp = arr[index];
-            arr[index] = arr[novoIndex];
-            arr[novoIndex] = temp;
-
-            if (tipo === 'posto') {
-                renderizarPostos();
-            } else {
-                renderizarColaboradores();
-            }
-        }
-
-        // SISTEMA DE DRAG & DROP NATIVO PARA AS DUAS LISTAS
         function inicializarDragAndDrop() {
             ['listaPostos', 'listaColaboradores'].forEach(containerId => {
                 const container = document.getElementById(containerId);
@@ -761,7 +834,6 @@
                     if (card) {
                         card.classList.remove('dragging');
                         
-                        // Atualiza a estrutura de dados baseada na nova ordem DOM
                         const tipo = card.dataset.type;
                         const elementosDom = [...container.querySelectorAll('.dynamic-item')];
 
@@ -806,7 +878,6 @@
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
 
-        // --- GERADOR DA ESCALA ---
         function gerarEscala() {
             const mes = parseInt(document.getElementById("mes").value);
             const inicioDia = document.getElementById("inicioDia").value;
@@ -848,7 +919,6 @@
 
                     let colabsDisponiveis = [...colaboradores];
 
-                    // 1. Aloca FIXOS
                     colabsDisponiveis = colabsDisponiveis.filter(c => {
                         if (c.tipo === "fixo" && c.postoFixo) {
                             if (atribuicaoDia[c.postoFixo]) {
@@ -862,7 +932,6 @@
                         return true;
                     });
 
-                    // 2. Aloca ROTATIVOS
                     let postosDisponiveisParaGiro = postos.filter(p => {
                         if (p.bloqueadoMax1 && atribuicaoDia[p.nome].length >= 1) {
                             return false; 
@@ -932,18 +1001,146 @@
             htmlStats += '</div></div>';
 
             document.getElementById("resultado").innerHTML = htmlTabela + htmlStats;
-            document.getElementById("btnContainer").style.display = "block";
+            document.getElementById("btnContainer").style.display = "grid";
             document.getElementById("resultado").scrollIntoView({ behavior: "smooth" });
         }
 
-        // GERADOR DE PDF - SEM O RESUMO E TOTALIZAÇÃO DE PLANTÕES
+        /* FUNÇÃO DA NOVA ABA: ESTILOS DEDICADOS COM QUEBRA DE LINHA E AJUSTE 100% PARA MOBILE */
+        function abrirTabelaEmNovaAba() {
+            const tabelaElemento = document.getElementById("tabelaEscala");
+            if (!tabelaElemento) {
+                alert("Gere a escala primeiro!");
+                return;
+            }
+
+            const tabelaHtml = tabelaElemento.outerHTML;
+            const mesTexto = document.getElementById("mes").options[document.getElementById("mes").selectedIndex].text;
+
+            const documentoCompleto = `
+                <!DOCTYPE html>
+                <html lang="pt-BR">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Escala Completa - ${mesTexto} / 2026</title>
+                    <style>
+                        * {
+                            box-sizing: border-box;
+                            margin: 0;
+                            padding: 0;
+                        }
+                        html, body {
+                            width: 100%;
+                            min-height: 100vh;
+                            background-color: #ffffff;
+                        }
+                        body {
+                            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                            padding: 8px;
+                            color: #1e293b;
+                        }
+                        .header {
+                            text-align: center;
+                            margin-bottom: 12px;
+                            padding-bottom: 8px;
+                            border-bottom: 1px solid #e2e8f0;
+                        }
+                        h1 { 
+                            font-size: 18px; 
+                            color: #0f172a; 
+                            margin-bottom: 2px;
+                            font-weight: 700;
+                        }
+                        p { 
+                            color: #64748b; 
+                            font-size: 12px; 
+                        }
+                        
+                        .table-container {
+                            width: 100%;
+                        }
+
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            font-size: 11px;
+                            text-align: center;
+                            table-layout: fixed;
+                        }
+
+                        th, td {
+                            border: 1px solid #cbd5e1;
+                            padding: 6px 3px;
+                            white-space: normal !important;
+                            word-break: break-word !important;
+                            overflow-wrap: break-word !important;
+                        }
+
+                        th {
+                            background-color: #1e293b;
+                            color: #ffffff;
+                            font-weight: 600;
+                            font-size: 11px;
+                            text-transform: uppercase;
+                        }
+
+                        tr:nth-child(even) td { 
+                            background-color: #f8fafc; 
+                        }
+
+                        tr.has-support td { 
+                            background-color: #fef2f2; 
+                        }
+
+                        .support-badge {
+                            background-color: #fee2e2;
+                            color: #dc2626;
+                            font-size: 9px;
+                            font-weight: bold;
+                            padding: 1px 3px;
+                            border-radius: 3px;
+                            display: inline-block;
+                            margin-top: 2px;
+                        }
+
+                        .footer {
+                            margin-top: 16px;
+                            text-align: center;
+                            font-size: 10px;
+                            color: #94a3b8;
+                        }
+
+                        @media print {
+                            body { padding: 0; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>Escala de Trabalho 12x36</h1>
+                        <p>Mês de Referência: ${mesTexto} / 2026</p>
+                    </div>
+                    <div class="table-container">
+                        ${tabelaHtml}
+                    </div>
+                    <div class="footer">
+                        © 2026 Desenvolvido por C.D. | Todos os direitos reservados.
+                    </div>
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob([documentoCompleto], { type: "text/html;charset=utf-8" });
+            const urlBlob = URL.createObjectURL(blob);
+            window.open(urlBlob, "_blank");
+        }
+
         function baixarEscalaPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF("l", "pt", "a4");
 
             const mesTexto = document.getElementById("mes").options[document.getElementById("mes").selectedIndex].text;
 
-            // Cabeçalho Principal
             doc.setFont("Helvetica", "bold");
             doc.setFontSize(18);
             doc.setTextColor(30, 41, 59);
@@ -954,7 +1151,6 @@
             doc.setTextColor(100, 116, 139);
             doc.text(`Período de Referência: ${mesTexto} / 2026`, 40, 56);
 
-            // Tabela Principal da Escala
             doc.autoTable({
                 html: '#tabelaEscala',
                 startY: 70,
@@ -982,7 +1178,6 @@
                 }
             });
 
-            // Rodapé com paginação
             const pageCount = doc.internal.getNumberOfPages();
             for (let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
@@ -994,7 +1189,6 @@
             doc.save(`escala_12x36_${mesTexto.toLowerCase()}_2026.pdf`);
         }
 
-        // SEGURANÇA E UX
         document.addEventListener("contextmenu", e => e.preventDefault());
         document.onkeydown = function(e) {
             if (e.keyCode === 123 || 
