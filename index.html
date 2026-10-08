@@ -756,53 +756,65 @@
         </header>
 
         <div id="viewHome" class="view-section active">
-            <div class="home-grid">
-                
-                <div class="card-home" style="--card-accent: var(--accent-cyan);" onclick="abrirEtapaWizard(1)">
-                    <div>
-                        <div class="card-header-icon">
-                            <div class="card-icon">📅</div>
-                            <span class="chip-summary" style="--chip-color: var(--accent-cyan);" id="summaryCard1">Carregando...</span>
-                        </div>
-                        <div class="card-title">1. Período & Paridade</div>
-                        <div class="card-info">Escolha o mês de referência e defina a paridade dos plantões (dias pares ou ímpares).</div>
+    <div class="home-grid">
+        
+        
+        <div class="card-home" style="--card-accent: var(--accent-cyan);" onclick="abrirEtapaWizard(1)">
+            <div>
+                <div class="card-header-icon">
+                    <div class="card-icon">
+                        <img src="img/Calendário.webp" alt="Calendário" style="width: 26px; height: 26px; object-fit: contain;">
                     </div>
+                    <span class="chip-summary" style="--chip-color: var(--accent-cyan);" id="summaryCard1">Carregando...</span>
                 </div>
-
-                <div class="card-home" style="--card-accent: var(--accent-amber);" onclick="abrirEtapaWizard(2)">
-                    <div>
-                        <div class="card-header-icon">
-                            <div class="card-icon">🏢</div>
-                            <span class="chip-summary" style="--chip-color: var(--accent-amber);" id="summaryCard2">Carregando...</span>
-                        </div>
-                        <div class="card-title">2. Postos de Trabalho</div>
-                        <div class="card-info">Cadastre e reordene os setores ou guaritas sob sua responsabilidade.</div>
-                    </div>
-                </div>
-
-                <div class="card-home" style="--card-accent: var(--accent-emerald);" onclick="abrirEtapaWizard(3)">
-                    <div>
-                        <div class="card-header-icon">
-                            <div class="card-icon">👥</div>
-                            <span class="chip-summary" style="--chip-color: var(--accent-emerald);" id="summaryCard3">Carregando...</span>
-                        </div>
-                        <div class="card-title">3. Colaboradores e Regras</div>
-                        <div class="card-info">Configure a equipe, regras de rodízio aleatório, postos fixos ou duplas.</div>
-                    </div>
-                </div>
-
-                <div class="card-home" style="--card-accent: var(--accent-purple);" onclick="abrirEtapaWizard(4)">
-                    <div>
-                        <div class="card-header-icon">
-                            <div class="card-icon">⚡</div>
-                            <span class="chip-summary" style="--chip-color: var(--accent-purple);" id="summaryCard4">Carregando...</span>
-                        </div>
-                        <div class="card-title">4. Informação de Apoio</div>
-                        <div class="card-info">Ative avisos de reforço operacional para dias específicos da semana.</div>
-                    </div>
-                </div>
-
+                <div class="card-title">1. Período & Paridade</div>
+                <div class="card-info">Escolha o mês de referência e defina a paridade dos plantões (dias pares ou ímpares).</div>
             </div>
+        </div>
+
+        
+        <div class="card-home" style="--card-accent: var(--accent-amber);" onclick="abrirEtapaWizard(2)">
+            <div>
+                <div class="card-header-icon">
+                    <div class="card-icon">
+                        <img src="img/Complexo.webp" alt="Complexo" style="width: 26px; height: 26px; object-fit: contain;">
+                    </div>
+                    <span class="chip-summary" style="--chip-color: var(--accent-amber);" id="summaryCard2">Carregando...</span>
+                </div>
+                <div class="card-title">2. Postos de Trabalho</div>
+                <div class="card-info">Cadastre e reordene os setores ou guaritas sob sua responsabilidade.</div>
+            </div>
+        </div>
+
+       
+        <div class="card-home" style="--card-accent: var(--accent-emerald);" onclick="abrirEtapaWizard(3)">
+            <div>
+                <div class="card-header-icon">
+                    <div class="card-icon">
+                        <img src="img/Equipe.webp" alt="Equipe" style="width: 26px; height: 26px; object-fit: contain;">
+                    </div>
+                    <span class="chip-summary" style="--chip-color: var(--accent-emerald);" id="summaryCard3">Carregando...</span>
+                </div>
+                <div class="card-title">3. Colaboradores e Regras</div>
+                <div class="card-info">Configure a equipe, regras de rodízio aleatório, postos fixos ou duplas.</div>
+            </div>
+        </div>
+
+        
+        <div class="card-home" style="--card-accent: var(--accent-purple);" onclick="abrirEtapaWizard(4)">
+            <div>
+                <div class="card-header-icon">
+                    <div class="card-icon">
+                        <img src="img/Raio.webp" alt="Raio" style="width: 26px; height: 26px; object-fit: contain;">
+                    </div>
+                    <span class="chip-summary" style="--chip-color: var(--accent-purple);" id="summaryCard4">Carregando...</span>
+                </div>
+                <div class="card-title">4. Informação de Apoio</div>
+                <div class="card-info">Ative avisos de reforço operacional para dias específicos da semana.</div>
+            </div>
+        </div>
+
+    </div>
 
             <button class="btn btn-primary" style="width: 100%; padding: 18px; font-size: 17px;" onclick="executarGeracaoEscala()">
                 Gerar Escala de Trabalho
