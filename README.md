@@ -2,4 +2,7 @@
 
 .v3.3
 
+Novas atualizações estão por vir...
+
+
 © 2026 Desenvolvido por C.D. | Todos os direitos reservados.
