@@ -1,4 +1,5 @@
-# T
-Ferramenta simplificada para trabalhos diversos.
+# Ferramenta simplificada para montagem de escala 12x36.
 
-Estou atualizando com novas funcionalidades...Em breve devo upar a nova versão.
+.v3.1
+
+© 2026 Desenvolvido por C.D. | Todos os direitos reservados.
