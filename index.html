@@ -486,25 +486,138 @@
             border: 1px solid var(--card-border);
         }
 
-        .posto-item { grid-template-columns: auto 2fr auto auto; }
-        .colab-item { grid-template-columns: auto 1.5fr 1.2fr 1.5fr auto; }
+        .dynamic-item.posto-item,
+        .dynamic-item.colab-item {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .dynamic-item-primary,
+        .dynamic-item-options {
+            display: grid;
+            align-items: end;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .dynamic-item-primary {
+            grid-template-columns: 44px minmax(0, 1fr);
+            gap: 12px;
+        }
+
+        .dynamic-item-options {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+        }
+
+        .dynamic-item-actions {
+            display: flex;
+            align-items: flex-end;
+            align-self: end;
+            justify-content: flex-end;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .dynamic-item .btn-danger {
+            min-height: 46px;
+            padding: 10px 14px;
+            white-space: nowrap;
+        }
+
+        .posto-limit-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+            min-height: 48px;
+            padding: 10px 12px;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.7);
+            color: var(--text-muted);
+            font-size: 0.88em;
+            line-height: 1.35;
+            cursor: pointer;
+        }
+
+        .posto-item .dynamic-item-options {
+            grid-template-columns: minmax(0, 1fr) auto;
+        }
+
+        .colab-item .dynamic-item-options {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+        }
+
+        .dynamic-item .input-group {
+            min-width: 0;
+        }
+
+        .dynamic-item-primary .input-group {
+            width: 100%;
+        }
+
+        .dynamic-item-primary input[type="text"],
+        .dynamic-item select {
+            width: 100%;
+            min-width: 0;
+        }
 
         @media (max-width: 700px) {
-            .posto-item, .colab-item { grid-template-columns: 1fr; }
+            .colab-item .dynamic-item-options {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .dynamic-item-actions {
+                grid-column: 1 / -1;
+            }
+
+            .dynamic-item-actions .btn-danger {
+                margin-left: auto;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .dynamic-item {
+                padding: 12px;
+            }
+
+            .dynamic-item-primary {
+                grid-template-columns: 40px minmax(0, 1fr);
+                gap: 10px;
+            }
+
+            .colab-item .dynamic-item-options {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .posto-item .dynamic-item-options {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .dynamic-item-actions {
+                grid-column: auto;
+            }
+
+            .posto-item .dynamic-item-actions {
+                grid-column: auto;
+            }
         }
 
         .drag-handle {
-            border: 0;
+            width: 44px;
+            min-height: 46px;
+            border: 1px solid var(--card-border);
             cursor: grab;
             font-family: inherit;
             font-size: 18px;
             color: var(--text-muted);
-            padding: 8px;
+            padding: 8px 6px;
             text-align: center;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
             user-select: none;
             touch-action: none;
+            justify-self: center;
+            align-self: end;
         }
 
         .drag-handle:active {
@@ -1036,16 +1149,22 @@
                 item.dataset.sortIndex = index;
 
                 item.innerHTML = `
-                    <button type="button" class="drag-handle" aria-label="Mover posto ${escaparHtml(p.nome)}; use as setas para reordenar" title="Arraste para reordenar ou use as setas do teclado" onkeydown="moverItemComTeclado(event, 'posto', ${index})">⇳</button>
-                    <div class="input-group">
-                        <label>Nome do Posto</label>
-                        <input type="text" value="${escaparHtml(p.nome)}" onchange="atualizarPosto(${index}, 'nome', this.value)">
+                    <div class="dynamic-item-primary">
+                        <button type="button" class="drag-handle" aria-label="Mover posto ${escaparHtml(p.nome)}; use as setas para reordenar" title="Arraste para reordenar ou use as setas do teclado" onkeydown="moverItemComTeclado(event, 'posto', ${index})">⇳</button>
+                        <div class="input-group">
+                            <label>Nome do Posto</label>
+                            <input type="text" value="${escaparHtml(p.nome)}" onchange="atualizarPosto(${index}, 'nome', this.value)">
+                        </div>
                     </div>
-                    <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.85em; color: var(--text-muted);">
-                        <input type="checkbox" ${p.bloqueadoMax1 ? 'checked' : ''} onchange="atualizarPosto(${index}, 'bloqueadoMax1', this.checked)">
-                        Máx 1 Colab.
-                    </label>
-                    <button class="btn btn-danger" onclick="removerPosto(${index})">Remover</button>
+                    <div class="dynamic-item-options">
+                        <label class="posto-limit-option">
+                            <input type="checkbox" ${p.bloqueadoMax1 ? 'checked' : ''} onchange="atualizarPosto(${index}, 'bloqueadoMax1', this.checked)">
+                            Máximo 1 Colaborador no Posto
+                        </label>
+                        <div class="dynamic-item-actions">
+                            <button class="btn btn-danger" onclick="removerPosto(${index})">Remover</button>
+                        </div>
+                    </div>
                 `;
                 container.appendChild(item);
             });
@@ -1109,28 +1228,34 @@
                     .join("");
 
                 item.innerHTML = `
-                    <button type="button" class="drag-handle" aria-label="Mover colaborador ${escaparHtml(colab.nome || 'Sem nome')}; use as setas para reordenar" title="Arraste para reordenar ou use as setas do teclado" onkeydown="moverItemComTeclado(event, 'colaborador', ${index})">⇳</button>
-                    <div class="input-group">
-                        <label>Nome</label>
-                        <input type="text" value="${escaparHtml(colab.nome)}" onchange="atualizarColab(${index}, 'nome', this.value)">
+                    <div class="dynamic-item-primary">
+                        <button type="button" class="drag-handle" aria-label="Mover colaborador ${escaparHtml(colab.nome || 'Sem nome')}; use as setas para reordenar" title="Arraste para reordenar ou use as setas do teclado" onkeydown="moverItemComTeclado(event, 'colaborador', ${index})">⇳</button>
+                        <div class="input-group">
+                            <label>Nome</label>
+                            <input type="text" value="${escaparHtml(colab.nome)}" onchange="atualizarColab(${index}, 'nome', this.value)">
+                        </div>
                     </div>
-                    <div class="input-group">
-                        <label>Regra</label>
-                        <select onchange="atualizarColab(${index}, 'tipo', this.value)">
-                            <option value="rotativo" ${colab.tipo === 'rotativo' ? 'selected' : ''}>Rotativo</option>
-                            <option value="fixo" ${colab.tipo === 'fixo' ? 'selected' : ''}>Fixo no Posto</option>
-                            <option value="par" ${colab.tipo === 'par' ? 'selected' : ''}>Par com...</option>
-                        </select>
+                    <div class="dynamic-item-options">
+                        <div class="input-group">
+                            <label>Regra</label>
+                            <select onchange="atualizarColab(${index}, 'tipo', this.value)">
+                                <option value="rotativo" ${colab.tipo === 'rotativo' ? 'selected' : ''}>Rotativo</option>
+                                <option value="fixo" ${colab.tipo === 'fixo' ? 'selected' : ''}>Fixo no Posto</option>
+                                <option value="par" ${colab.tipo === 'par' ? 'selected' : ''}>Par com...</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Detalhes</label>
+                            ${colab.tipo === 'fixo' 
+                                ? `<select onchange="atualizarColab(${index}, 'postoFixo', this.value)">${opcoesPosto}</select>`
+                                : colab.tipo === 'par'
+                                ? `<select onchange="atualizarColab(${index}, 'parNome', this.value)"><option value="">Selecione Par</option>${outrosColabs}</select>`
+                                : `<input type="text" value="Giro entre postos" disabled>`}
+                        </div>
+                        <div class="dynamic-item-actions">
+                            <button class="btn btn-danger" onclick="removerColaborador(${index})">Remover</button>
+                        </div>
                     </div>
-                    <div class="input-group">
-                        <label>Detalhes</label>
-                        ${colab.tipo === 'fixo' 
-                            ? `<select onchange="atualizarColab(${index}, 'postoFixo', this.value)">${opcoesPosto}</select>`
-                            : colab.tipo === 'par'
-                            ? `<select onchange="atualizarColab(${index}, 'parNome', this.value)"><option value="">Selecione Par</option>${outrosColabs}</select>`
-                            : `<input type="text" value="Giro entre postos" disabled>`}
-                    </div>
-                    <button class="btn btn-danger" onclick="removerColaborador(${index})">Remover</button>
                 `;
                 container.appendChild(item);
             });
