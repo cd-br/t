@@ -525,18 +525,8 @@
 
         .posto-limit-option {
             display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 0;
-            min-height: 48px;
-            padding: 10px 12px;
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            background: rgba(15, 23, 42, 0.7);
-            color: var(--text-muted);
-            font-size: 0.88em;
-            line-height: 1.35;
-            cursor: pointer;
+            flex-direction: column;
+            justify-content: flex-end;
         }
 
         .posto-item .dynamic-item-options {
@@ -940,9 +930,9 @@
         let passoAtual = 1;
 
         let postos = [
-            { id: "p1", nome: "Portaria 1 Ronda", bloqueadoMax1: false },
-            { id: "p2", nome: "Portaria 2 Interno", bloqueadoMax1: false },
-            { id: "p3", nome: "Portaria 2 Externo", bloqueadoMax1: false }
+            { id: "p1", nome: "Portaria 1 Ronda", limiteColaboradores: null },
+            { id: "p2", nome: "Portaria 2 Interno", limiteColaboradores: null },
+            { id: "p3", nome: "Portaria 2 Externo", limiteColaboradores: null }
         ];
 
         let colaboradores = [
@@ -1043,6 +1033,12 @@
             })[caractere]);
         }
 
+        function normalizarLimiteColaboradores(valor) {
+            if (valor === "" || valor === null || valor === undefined) return null;
+            const limite = Number(valor);
+            return Number.isInteger(limite) && limite >= 1 && limite <= 10 ? limite : null;
+        }
+
         // SALVAMENTO LOCAL
         function salvarEstado() {
             const diasApoio = Array.from(document.querySelectorAll('.chk-dia-apoio:checked')).map(cb => parseInt(cb.value));
@@ -1096,7 +1092,9 @@
                             .map((p, index) => ({
                                 id: typeof p.id === "string" && p.id ? p.id : `p_${Date.now()}_${index}`,
                                 nome: typeof p.nome === "string" ? p.nome : `Posto ${index + 1}`,
-                                bloqueadoMax1: p.bloqueadoMax1 === true
+                                limiteColaboradores: p.limiteColaboradores !== undefined
+                                    ? normalizarLimiteColaboradores(p.limiteColaboradores)
+                                    : p.bloqueadoMax1 === true ? 1 : null
                             }));
                     }
                     if (Array.isArray(dados.colaboradores)) {
@@ -1144,9 +1142,18 @@
 
             postos.forEach((p, index) => {
                 if (!p.id) p.id = "p_" + Date.now() + "_" + index;
+                p.limiteColaboradores = normalizarLimiteColaboradores(p.limiteColaboradores);
                 const item = document.createElement("div");
                 item.className = "dynamic-item posto-item";
                 item.dataset.sortIndex = index;
+
+                const opcoesLimiteColaboradores = [
+                    `<option value="" ${p.limiteColaboradores === null ? "selected" : ""}>Sem bloqueio</option>`,
+                    ...Array.from({ length: 10 }, (_, indice) => {
+                        const limite = indice + 1;
+                        return `<option value="${limite}" ${p.limiteColaboradores === limite ? "selected" : ""}>${limite} ${limite === 1 ? "colaborador" : "colaboradores"}</option>`;
+                    })
+                ].join("");
 
                 item.innerHTML = `
                     <div class="dynamic-item-primary">
@@ -1157,10 +1164,12 @@
                         </div>
                     </div>
                     <div class="dynamic-item-options">
-                        <label class="posto-limit-option">
-                            <input type="checkbox" ${p.bloqueadoMax1 ? 'checked' : ''} onchange="atualizarPosto(${index}, 'bloqueadoMax1', this.checked)">
-                            Máximo 1 Colaborador no Posto
-                        </label>
+                        <div class="input-group posto-limit-option">
+                            <label for="limiteColaboradores${index}">Máximo de colaboradores no posto</label>
+                            <select id="limiteColaboradores${index}" onchange="atualizarPosto(${index}, 'limiteColaboradores', this.value)">
+                                ${opcoesLimiteColaboradores}
+                            </select>
+                        </div>
                         <div class="dynamic-item-actions">
                             <button class="btn btn-danger" onclick="removerPosto(${index})">Remover</button>
                         </div>
@@ -1175,14 +1184,16 @@
 
         function adicionarPosto() {
             const novoId = "p_" + Date.now();
-            postos.push({ id: novoId, nome: `Novo Posto ${postos.length + 1}`, bloqueadoMax1: false });
+            postos.push({ id: novoId, nome: `Novo Posto ${postos.length + 1}`, limiteColaboradores: null });
             postosApoioAtivos.push(novoId);
             renderizarPostos();
         }
 
         function atualizarPosto(index, campo, valor) {
             const nomeAnterior = postos[index].nome;
-            postos[index][campo] = valor;
+            postos[index][campo] = campo === "limiteColaboradores"
+                ? normalizarLimiteColaboradores(valor)
+                : valor;
             if (campo === "nome") {
                 colaboradores.forEach(colaborador => {
                     if (colaborador.postoFixo === nomeAnterior) colaborador.postoFixo = valor;
@@ -1363,6 +1374,44 @@
             const inicioDia = document.getElementById("inicioDia").value;
             const textoApoioGlobal = document.getElementById("textoApoioGlobal").value || "Apoio";
 
+            const colaboradorFixoSemPosto = colaboradores.find(colaborador =>
+                colaborador.tipo === "fixo" &&
+                !postos.some(posto => posto.nome === colaborador.postoFixo)
+            );
+
+            if (colaboradorFixoSemPosto) {
+                alert(`O colaborador "${colaboradorFixoSemPosto.nome}" está configurado como fixo, mas não tem um posto válido. Selecione um posto antes de gerar a escala.`);
+                return;
+            }
+
+            const postosFixosAcimaDoLimite = postos
+                .map(posto => ({
+                    posto: posto,
+                    quantidadeFixa: colaboradores.filter(colaborador =>
+                        colaborador.tipo === "fixo" && colaborador.postoFixo === posto.nome
+                    ).length
+                }))
+                .filter(item => item.posto.limiteColaboradores !== null &&
+                    item.quantidadeFixa > item.posto.limiteColaboradores);
+
+            if (postosFixosAcimaDoLimite.length) {
+                const conflito = postosFixosAcimaDoLimite[0];
+                alert(`O posto "${conflito.posto.nome}" tem limite de ${conflito.posto.limiteColaboradores} colaborador(es), mas ${conflito.quantidadeFixa} colaborador(es) estão fixados nele. Aumente o limite ou selecione "Sem bloqueio".`);
+                return;
+            }
+
+            const capacidadeTotal = postos.reduce((total, posto) =>
+                posto.limiteColaboradores === null
+                    ? Infinity
+                    : total + posto.limiteColaboradores,
+                0
+            );
+
+            if (capacidadeTotal < colaboradores.length) {
+                alert(`A capacidade máxima dos postos é de ${capacidadeTotal} colaborador(es), mas a equipe tem ${colaboradores.length}. Aumente os limites ou selecione "Sem bloqueio" em algum posto.`);
+                return;
+            }
+
             const diasApoioMarcados = Array.from(document.querySelectorAll('.chk-dia-apoio:checked')).map(cb => parseInt(cb.value));
             const postosApoioMarcados = Array.from(document.querySelectorAll('.chk-posto-apoio:checked')).map(cb => cb.value);
 
@@ -1407,7 +1456,8 @@
 
                     colabsDisponiveis.forEach((c, idx) => {
                         const postosDisponiveisParaGiro = postos.filter(p => {
-                            return !p.bloqueadoMax1 || atribuicaoDia[p.nome].length < 1;
+                            return p.limiteColaboradores === null ||
+                                atribuicaoDia[p.nome].length < p.limiteColaboradores;
                         });
 
                         if (postosDisponiveisParaGiro.length > 0) {
@@ -1416,8 +1466,12 @@
                             if (c.tipo === "par" && c.parNome) {
                                 const parColab = colaboradores.find(item => item.nome === c.parNome);
                                 if (parColab && parColab.postoFixo && atribuicaoDia[parColab.postoFixo]) {
-                                    const objPostoPar = postos.find(p => p.nome === parColab.postoFixo);
-                                    if (!objPostoPar || !objPostoPar.bloqueadoMax1) postoDesignado = parColab.postoFixo;
+                                    const postoDoPar = postos.find(p => p.nome === parColab.postoFixo);
+                                    if (postoDoPar &&
+                                        (postoDoPar.limiteColaboradores === null ||
+                                            atribuicaoDia[postoDoPar.nome].length < postoDoPar.limiteColaboradores)) {
+                                        postoDesignado = parColab.postoFixo;
+                                    }
                                 }
                             }
 
